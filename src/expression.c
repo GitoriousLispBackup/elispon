@@ -1,9 +1,9 @@
 #include "utils.h"
 #include "expression.h"
-#include "number.h"
+#include "pair.h"
 #include "symbol.h"
 #include "string.h"
-#include "pair.h"
+#include "number.h"
 
 struct Expression {
   ExprType type;
@@ -33,8 +33,8 @@ Expression_delete (Expression *self)
   debug_in();
 
   switch (self->type) {
-  case NUMBER:
-    Number_delete(self->expr);
+  case PAIR:
+    if (self->expr != NULL) Pair_delete(self->expr);
     break;
   case SYMBOL:
     Symbol_delete(self->expr);
@@ -42,8 +42,8 @@ Expression_delete (Expression *self)
   case STRING:
     String_delete(self->expr);
     break;
-  case PAIR:
-    Pair_delete(self->expr);
+  case NUMBER:
+    Number_delete(self->expr);
     break;
   default:
     Utils_error("Expression_delete: unknown expression type.");
