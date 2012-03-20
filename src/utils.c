@@ -7,7 +7,8 @@ Utils_openFile (const char *path, const char *mode)
 {
   FILE *f = NULL;
 
-  f = fopen(path, mode);
+  if ((f = fopen(path, mode)) == NULL)
+    Utils_fatal("fopen(%s, %s): %s", path, mode, strerror(errno));
 
   return f;
 }
@@ -49,5 +50,6 @@ Utils_fatal (const char *format, ...)
   fprintf(stderr, "(ε) Error: ");
   vfprintf(stderr, format, ap);
   fprintf(stderr, "\n");
+
   exit(EXIT_FAILURE);
 }
