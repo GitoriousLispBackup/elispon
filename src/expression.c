@@ -69,3 +69,24 @@ Expression_expr (Expression *self)
 }
 
 /* ----- */
+
+int
+Expression_isNil (Expression *self)
+{
+  return self->type == PAIR
+    && !self->expr;
+}
+
+int
+Expression_isAtom (Expression *self)
+{
+  return self->type != PAIR;
+}
+
+int
+Expression_isValue (Expression *self)
+{
+  return self->type == NUMBER
+    || self->type == STRING
+    || Expression_isNil(self);
+}
