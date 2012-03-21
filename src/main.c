@@ -1,35 +1,16 @@
 #include <stdio.h>
-#include "expression.h"
-#include "number.h"
-#include "symbol.h"
-#include "string.h"
-#include "pair.h"
-#include "parser.h"
-#include "printer.h"
+#include "repl.h"
 
 int
 main (int argc, char *argv[])
 {
-  Expression *e = NULL;
-  Parser *p = NULL;
-  Printer *pr = NULL;
+  REPL *repl = NULL;
 
-  printf("(εlispon) version 0\n");
+  repl = REPL_new();
 
-  p = Parser_new("/dev/stdin");
+  while(REPL_print(REPL_eval(REPL_read(repl))));
 
-  e = Parser_parseExpression(p);
-
-  Parser_delete(p);
-
-  pr = Printer_new("/dev/stdout");
-
-  Printer_printExpression(pr, e);
-
-  Printer_delete(pr);
-  printf("\n");
-
-  Expression_delete(e);
+  REPL_delete(repl);
 
   return 0;
 }
