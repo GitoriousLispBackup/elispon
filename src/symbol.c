@@ -3,21 +3,17 @@
 #include "symbol.h"
 
 struct Symbol {
-  char name[MAX_SYMBOL_LENGTH];
+  char name[SYMBOL_NAME_MAX_SIZE];
 };
 
 Symbol *
-Symbol_new (char name[MAX_SYMBOL_LENGTH])
+Symbol_new (char name[SYMBOL_NAME_MAX_SIZE])
 {
   Symbol *self = NULL;
 
-  debug_in();
-
   alloc_one(self);
 
-  strncpy(self->name, name, MAX_SYMBOL_LENGTH);
-
-  debug_out();
+  strncpy(self->name, name, SYMBOL_NAME_MAX_SIZE);
 
   return self;
 }
@@ -25,11 +21,8 @@ Symbol_new (char name[MAX_SYMBOL_LENGTH])
 void
 Symbol_delete (Symbol *self)
 {
-  debug_in();
-
+  if (self == NULL) return;
   free_(self);
-
-  debug_out();
 }
 
 /* ----- */

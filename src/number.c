@@ -10,13 +10,9 @@ Number_new (double val)
 {
   Number *self = NULL;
 
-  debug_in();
-
   alloc_one(self);
 
   self->val = val;
-
-  debug_out();
 
   return self;
 }
@@ -24,11 +20,8 @@ Number_new (double val)
 void
 Number_delete (Number *self)
 {
-  debug_in();
-
+  if (self == NULL) return;
   free_(self);
-
-  debug_out();
 }
 
 /* ----- */

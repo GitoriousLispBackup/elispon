@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include "utils.h"
 #include "expression.h"
 #include "pair.h"
@@ -16,14 +15,10 @@ Expression_new (ExprType type, void *expr)
 {
   Expression *self = NULL;
 
-  debug_in();
-
   alloc_one(self);
 
   self->type = type;
   self->expr = expr;
-
-  debug_out();
 
   return self;
 }
@@ -31,8 +26,7 @@ Expression_new (ExprType type, void *expr)
 void
 Expression_delete (Expression *self)
 {
-  debug_in();
-
+  if (self == NULL) return;
   switch (self->type) {
   case PAIR:
     if (self->expr != NULL) Pair_delete(self->expr);
@@ -51,8 +45,6 @@ Expression_delete (Expression *self)
   }
 
   free_(self);
-
-  debug_out();
 }
 
 /* ----- */

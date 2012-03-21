@@ -1,11 +1,11 @@
 #ifndef SYMBOL_H__
 #define SYMBOL_H__
 
+#define SYMBOL_NAME_MAX_SIZE 256
+
 typedef struct Symbol Symbol;
 
-#define MAX_SYMBOL_LENGTH 256
-
-Symbol *Symbol_new (char name[MAX_SYMBOL_LENGTH]);
+Symbol *Symbol_new (char name[SYMBOL_NAME_MAX_SIZE]);
 void Symbol_delete (Symbol *self);
 
 char *Symbol_name (Symbol *self);

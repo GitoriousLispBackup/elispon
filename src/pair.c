@@ -10,14 +10,10 @@ Pair_new (Expression *fst, Expression *snd)
 {
   Pair *self = NULL;
 
-  debug_in();
-
   alloc_one(self);
 
   self->fst = fst;
   self->snd = snd;
-
-  debug_out();
 
   return self;
 }
@@ -25,13 +21,10 @@ Pair_new (Expression *fst, Expression *snd)
 void
 Pair_delete (Pair *self)
 {
-  debug_in();
-  
+  if (self == NULL) return;
   Expression_delete(self->fst);
   Expression_delete(self->snd);
   free_(self);
-
-  debug_out();
 }
 
 /* ----- */

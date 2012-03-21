@@ -10,21 +10,19 @@
 struct Parser {
   Lexer *lexer;
   int depth;
+  bool error;
 };
 
 Parser *
-Parser_new (const char *input)
+Parser_new (Port *input)
 {
   Parser *self = NULL;
-
-  debug_in();
 
   alloc_one(self);
 
   self->lexer = Lexer_new(input);
   self->depth = 0;
-
-  debug_out();
+  self->error = false;
 
   return self;
 }
@@ -32,22 +30,24 @@ Parser_new (const char *input)
 void
 Parser_delete (Parser *self)
 {
-  debug_in();
-
+  if (self == NULL) return;
   Lexer_delete(self->lexer);
-  free(self);
+  free_(self);
+}
 
   debug_out();
 }
 
 /* ----- */
 
-void
+void *
 Parser_error (Parser *self, char *error)
 {
-  Utils_fatal("Parser: %s at line %d column %d in %s",
+  Utils_error("Parser: %s at line %d column %d in %s",
               error, Lexer_line(self->lexer), Lexer_col(self->lexer),
-              Lexer_source(self->lexer));
+              Port_name(Lexer_input(self->lexer)));
+  self->error = true;
+  return NULL;
 }
 
 Pair *
@@ -55,21 +55,23 @@ Parser_parsePair (Parser *self)
 {
   Expression *car = NULL, *cdr = NULL;
 
-  if (Lexer_step(self->lexer) == TClosingParen)
+  if (Lexer_step(self->lexer) == TClosingParen) {
+    self->depth--;
     return NULL;
+  }
 
   Lexer_stepback(self->lexer);
   car = Parser_parseExpression(self);
 
   if (Lexer_step(self->lexer) == TDot) {
     if (Lexer_step(self->lexer) == TClosingParen)
-      Parser_error(self, "expected expression");
+      return Parser_error(self, "expected expression");
     else Lexer_stepback(self->lexer);
 
     cdr = Parser_parseExpression(self);
 
     if (Lexer_step(self->lexer) != TClosingParen)
-      Parser_error(self, "expected closing parenthesis");
+      return Parser_error(self, "expected closing parenthesis");
     self->depth--;
   }
   else {
@@ -93,10 +95,10 @@ Parser_parseExpression (Parser *self)
   case TClosingParen:
     self->depth--;
     if (self->depth < 0)
-      Parser_error(self, "too many closing parentheses");
+      return Parser_error(self, "too many closing parentheses");
     break;
   case TDot:
-    Parser_error(self, ". used out of context");
+    return Parser_error(self, ". used out of context");
     break;
   case TSymbol:
     expr = Expression_new(SYMBOL, Symbol_new(Lexer_token(self->lexer)));
@@ -109,11 +111,27 @@ Parser_parseExpression (Parser *self)
     break;
   case TEnd:
     if (self->depth != 0)
-      Parser_error(self, "reached EOF before end of expression");
+      return Parser_error(self, "reached EOF before end of expression");
     break;
   default:
-    Parser_error(self, "unknown token type");
+    return Parser_error(self, "unknown token type");
   }
+
+  if (self->error) {
+    Expression_delete(expr);
+    return NULL;
+  }
+
+  return expr;
+}
+
+Expression *
+Parser_parseOneExpression (Parser *self)
+{
+  Expression *expr = Parser_parseExpression(self);
+
+  if (Lexer_step(self->lexer) != TEnd)
+    return Parser_error(self, "expected EOF");
 
   return expr;
 }

@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "lexer.h"
 
-#define MAX_BUF_SIZE 2048
+#define BUFFER_MAX_SIZE 2048
 
 struct Lexer {
   FILE *input;
@@ -15,7 +15,7 @@ struct Lexer {
   int c;
   int size;
   TokenType type;
-  char token[MAX_BUF_SIZE];
+  char token[BUFFER_MAX_SIZE];
   double number;
   bool back;
 };
@@ -24,8 +24,6 @@ Lexer *
 Lexer_new (const char *source)
 {
   Lexer *self = NULL;
-
-  debug_in();
 
   alloc_one(self);
 
@@ -37,11 +35,9 @@ Lexer_new (const char *source)
   self->c = 0;
   self->size = 0;
   self->type = TUnkown;
-  memset(self->token, 0, MAX_BUF_SIZE);
+  memset(self->token, 0, BUFFER_MAX_SIZE);
   self->number = 0;
   self->back = false;
-
-  debug_out();
 
   return self;
 }
@@ -49,10 +45,9 @@ Lexer_new (const char *source)
 void
 Lexer_delete (Lexer *self)
 {
-  debug_in();
-
-  Utils_closeFile(self->input);
-  free(self);
+  if (self == NULL) return;
+  free_(self);
+}
 
   debug_out();
 }
@@ -106,7 +101,7 @@ Lexer_readToken (Lexer *self)
   }
 }
 
-void
+bool
 Lexer_readString (Lexer *self)
 {
   int escaped = 0;
@@ -150,7 +145,7 @@ Lexer_readString (Lexer *self)
     else if (self->c == '\\') escaped = 1;
     else if (self->c == '"') {
       self->token[self->size] = '\0';
-      return;
+      return true;
     }
     else {
       if (self->c == '\n') {
@@ -158,12 +153,15 @@ Lexer_readString (Lexer *self)
         self->col = 0;
       }
       self->token[self->size++] = self->c;
-      if (self->size >= MAX_BUF_SIZE)
+      if (self->size >= BUFFER_MAX_SIZE) {
         Lexer_error(self, "string or symbol length exceed max buffer size");
+        return false;
+      }
     }
   }
 
   Lexer_error(self, "reached EOF before end of string");
+  return false;
 }
 
 /* ----- */
@@ -195,8 +193,9 @@ Lexer_step (Lexer *self)
       self->type = TClosingParen;
       break;
     case '"':
-      Lexer_readString(self);
-      self->type = TString;
+      if (Lexer_readString(self))
+        self->type = TString;
+      else return TUnkown;
       break;
     default:
       {
@@ -215,7 +214,10 @@ Lexer_step (Lexer *self)
             self->type = TSymbol;
           else if (end - self->token == self->size)
             self->type = TNumber;
-          else Lexer_error(self, "malformed number");
+          else {
+            Lexer_error(self, "malformed number");
+            return TUnkown;
+          }
         }
         else self->type = TSymbol;
       }

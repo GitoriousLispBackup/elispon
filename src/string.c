@@ -12,15 +12,11 @@ String_new (char *str)
 {
   String *self = NULL;
 
-  debug_in();
-
   alloc_one(self);
 
   self->size = strlen(str) + 1;
   alloc_(self->buf, self->size);
   strcpy(self->buf, str);
-
-  debug_out();
 
   return self;
 
@@ -29,12 +25,9 @@ String_new (char *str)
 void
 String_delete (String *self)
 {
-  debug_in();
-  
+  if (self == NULL) return;
   free_(self->buf);
   free_(self);
-
-  debug_out();
 }
 
 /* ----- */

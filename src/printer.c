@@ -17,14 +17,10 @@ Printer_new (const char *output)
 {
   Printer *self = NULL;
 
-  debug_in();
-
   alloc_one(self);
 
   self->output = Utils_openFile(output, "a");
   self->indent = 0;
-
-  debug_out();
 
   return self;
 }
@@ -32,12 +28,9 @@ Printer_new (const char *output)
 void
 Printer_delete (Printer *self)
 {
-  debug_in();
-
+  if (self == NULL) return;
   Utils_closeFile(self->output);
   free_(self);
-
-  debug_out();
 }
 
 /* ----- */
@@ -101,4 +94,6 @@ Printer_printExpression (Printer *self, Expression *expr)
   default:
     Utils_error("Printer_printExpression: unknown expression type.");
   }
+
+  fflush(self->output);
 }
