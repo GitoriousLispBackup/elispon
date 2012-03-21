@@ -56,7 +56,7 @@ Parser_error (Parser *self, char *error)
   return NULL;
 }
 
-Pair *
+static Pair *
 Parser_parsePair (Parser *self)
 {
   Expression *car = NULL, *cdr = NULL;

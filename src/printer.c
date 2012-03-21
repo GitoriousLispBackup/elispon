@@ -35,7 +35,7 @@ Printer_delete (Printer *self)
 
 /* ----- */
 
-void
+static void
 Printer_printPair (Printer *self, Pair *pair)
 {
   Printer_printExpression(self, Pair_fst(pair));
@@ -52,13 +52,13 @@ Printer_printPair (Printer *self, Pair *pair)
   }
 }
 
-void
+static void
 Printer_printSymbol (Printer *self, Symbol *sym)
 {
   fprintf(self->output, Symbol_name(sym));
 }
 
-void
+static void
 Printer_printString (Printer *self, String *str)
 {
   fprintf(self->output, "\"");
@@ -66,7 +66,7 @@ Printer_printString (Printer *self, String *str)
   fprintf(self->output, "\"");
 }
 
-void
+static void
 Printer_printNumber (Printer *self, Number *num)
 {
   fprintf(self->output, "%g", Number_val(num));

@@ -63,14 +63,14 @@ Lexer_reset (Lexer *self, Port *input)
 
 /* ----- */
 
-void
+static void
 Lexer_error (Lexer *self, char *error)
 {
   Utils_error("Lexer: %s at line %d column %d in %s",
               error, self->line, self->col, Port_name(self->input));
 }
 
-int
+static int
 Lexer_getc (Lexer *self)
 {
   self->col++;
@@ -86,14 +86,14 @@ Lexer_getc (Lexer *self)
   return self->c;
 }
 
-int
+static int
 Lexer_ungetc (Lexer *self)
 {
   self->col--;
   return Port_ungetc(self->input, self->c);
 }
 
-void
+static void
 Lexer_readToken (Lexer *self)
 {
   self->size = 0;
@@ -110,7 +110,7 @@ Lexer_readToken (Lexer *self)
   }
 }
 
-bool
+static bool
 Lexer_readString (Lexer *self)
 {
   int escaped = 0;
@@ -245,6 +245,8 @@ Lexer_stepback (Lexer *self)
   self->back = true;
 }
 
+/* ----- */
+
 TokenType
 Lexer_type (Lexer *self)
 {
@@ -262,8 +264,6 @@ Lexer_number (Lexer *self)
 {
   return self->number;
 }
-
-/* ----- */
 
 int
 Lexer_line (Lexer *self)

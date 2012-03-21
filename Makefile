@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = --std=c99 -Wall -pedantic -g
+CFLAGS = -std=c99 -Wall -pedantic -g
 LDFLAGS = 
 DEBUG =
 SRC = $(wildcard src/*.c)

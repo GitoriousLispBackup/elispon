@@ -74,7 +74,8 @@ Port_name (Port *self)
 
 /* ----- */
 
-int Port_getc (Port *self)
+int
+Port_getc (Port *self)
 {
   switch (self->type) {
   case PFILE:
@@ -94,7 +95,8 @@ int Port_getc (Port *self)
   return EOF;
 }
 
-int Port_ungetc (Port *self, int c)
+int
+Port_ungetc (Port *self, int c)
 {
   switch (self->type) {
   case PFILE:
