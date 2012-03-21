@@ -11,6 +11,7 @@
 
 struct Parser {
   Lexer *lexer;
+  Expression *symbols;
   int depth;
   bool error;
 };
@@ -23,6 +24,7 @@ Parser_new (Port *input)
   alloc_one(self);
 
   self->lexer = Lexer_new(input);
+  self->symbols = Expression_new(PAIR, NULL);
   self->depth = 0;
   self->error = false;
 
@@ -34,6 +36,7 @@ Parser_delete (Parser *self)
 {
   if (self == NULL) return;
   Lexer_delete(self->lexer);
+  Expression_delete(self->symbols);
   free_(self);
 }
 
@@ -108,7 +111,14 @@ Parser_parseExpression (Parser *self)
     return Parser_error(self, ". used out of context");
     break;
   case TSymbol:
-    expr = Expression_new(SYMBOL, Symbol_new(Lexer_token(self->lexer)));
+    {
+      Symbol *sym = Utils_findSymbol(self->symbols, Lexer_token(self->lexer));
+      if (sym == NULL) {
+        expr = Expression_new(SYMBOL, Symbol_new(Lexer_token(self->lexer)));
+        self->symbols = Expression_cons(expr, self->symbols);
+      }
+      else expr = Expression_new(SYMBOL, sym);
+    }
     break;
   case TString:
     expr = Expression_new(STRING, String_new(Lexer_token(self->lexer)));

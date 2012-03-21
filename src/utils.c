@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include "expression.h"
+#include "symbol.h"
 #include "utils.h"
 
 FILE *
@@ -49,9 +51,26 @@ Utils_fatal (const char *format, ...)
   va_list ap;
   va_start(ap, format);
 
-  fprintf(stderr, "(ε) Error: ");
+  fprintf(stderr, "(ε) Fatal error: ");
   vfprintf(stderr, format, ap);
   fprintf(stderr, "\n");
 
   exit(EXIT_FAILURE);
+}
+
+/* ----- */
+
+Symbol *
+Utils_findSymbol (Expression *symbols, char *name)
+{
+  Symbol *sym = NULL;
+
+  while (!Expression_isNil(symbols)) {
+    sym = Expression_expr(Expression_car(symbols));
+    if (strcmp(name, Symbol_name(sym)) == 0)
+      return sym;
+    symbols = Expression_cdr(symbols);
+  }
+
+  return NULL;
 }

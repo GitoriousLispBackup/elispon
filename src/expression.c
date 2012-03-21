@@ -82,3 +82,27 @@ Expression_isValue (Expression *self)
   return self->type == NUMBER || self->type == STRING ||
     Expression_isNil(self);
 }
+
+Expression *
+Expression_cons (Expression *car, Expression *cdr)
+{
+  return Expression_new(PAIR, Pair_new(car, cdr));
+}
+
+Expression *
+Expression_car (Expression *self)
+{
+  if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
+    Utils_fatal("Utils_car: argument is not a pair");
+
+  return Pair_fst(Expression_expr(self));
+}
+
+Expression *
+Expression_cdr (Expression *self)
+{
+  if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
+    Utils_fatal("Utils_car: argument is not a pair");
+
+  return Pair_snd(Expression_expr(self));
+}

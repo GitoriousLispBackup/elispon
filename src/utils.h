@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include "expression.h"
+#include "symbol.h"
 
 #define alloc_one(ptr) alloc_(ptr, 1)
 
@@ -29,5 +31,7 @@ void Utils_closeFile (FILE *f);
 void Utils_log (const char *format, ...);
 void Utils_error (const char *format, ...);
 void Utils_fatal (const char *format, ...);
+
+Symbol *Utils_findSymbol (Expression *symbols, char *name);
 
 #endif /* UTILS_H__ */
