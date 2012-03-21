@@ -35,21 +35,28 @@ Printer_delete (Printer *self)
 {
   debug_in();
 
+  Utils_closeFile(self->output);
   free_(self);
 
   debug_out();
 }
 
+/* ----- */
+
 void
 Printer_printPair (Printer *self, Pair *pair)
 {
-  fprintf(self->output, "(");
-  if (pair != NULL) {
-    Printer_printExpression(self, Pair_fst(pair));
+  Printer_printExpression(self, Pair_fst(pair));
+  if (Expression_type(Pair_snd(pair)) == PAIR) {
+    if (!Expression_isNil(Pair_snd(pair))) {
+      fprintf(self->output, " ");
+      Printer_printPair(self, Expression_expr(Pair_snd(pair)));
+    }
+  }
+  else {
     fprintf(self->output, " . ");
     Printer_printExpression(self, Pair_snd(pair));
   }
-  fprintf(self->output, ")");
 }
 
 void
@@ -75,12 +82,23 @@ Printer_printNumber (Printer *self, Number *num)
 void
 Printer_printExpression (Printer *self, Expression *expr)
 {
-  void (*printer[4])() = {
-    Printer_printPair,
-    Printer_printSymbol,
-    Printer_printString,
-    Printer_printNumber
-  };
-
-  printer[Expression_type(expr)](self, Expression_expr(expr));
+  switch (Expression_type(expr)) {
+  case PAIR:
+    fprintf(self->output, "(");
+    if (!Expression_isNil(expr))
+      Printer_printPair(self, Expression_expr(expr));
+    fprintf(self->output, ")");
+    break;
+  case SYMBOL:
+    Printer_printSymbol(self, Expression_expr(expr));
+    break;
+  case STRING:
+    Printer_printString(self, Expression_expr(expr));
+    break;
+  case NUMBER:
+    Printer_printNumber(self, Expression_expr(expr));
+    break;
+  default:
+    Utils_error("Printer_printExpression: unknown expression type.");
+  }
 }
