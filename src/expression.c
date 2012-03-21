@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "utils.h"
 #include "expression.h"
 #include "pair.h"

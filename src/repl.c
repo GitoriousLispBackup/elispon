@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "utils.h"
 #include "port.h"
 #include "expression.h"
@@ -40,6 +41,8 @@ REPL_delete (REPL *self)
 {
   if (self == NULL) return;
   free_(self);
+
+  printf("\n\nBye.\n");
 }
 
 REPL *

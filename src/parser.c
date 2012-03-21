@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "utils.h"
 #include "port.h"
 #include "expression.h"

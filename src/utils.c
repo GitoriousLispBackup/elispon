@@ -19,6 +19,8 @@ Utils_closeFile (FILE *f)
   fclose(f);
 }
 
+/* ----- */
+
 void
 Utils_log (const char *format, ...)
 {
