@@ -12,3 +12,8 @@ struct Token {
 }
 and most of this information should be keeped at least until expansion time is
    over, maybe during runtime too to report fexpr error.
+
+
+
+
+Printer should use Port (Port must support printf)

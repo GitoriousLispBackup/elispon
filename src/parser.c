@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "port.h"
 #include "expression.h"
 #include "pair.h"
 #include "symbol.h"
@@ -35,7 +36,12 @@ Parser_delete (Parser *self)
   free_(self);
 }
 
-  debug_out();
+void
+Parser_reset (Parser *self, Port *input)
+{
+  Lexer_reset(self->lexer, input);
+  self->depth = 0;
+  self->error = false;
 }
 
 /* ----- */

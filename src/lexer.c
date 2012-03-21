@@ -4,13 +4,13 @@
 #include <string.h>
 #include <ctype.h>
 #include "utils.h"
+#include "port.h"
 #include "lexer.h"
 
 #define BUFFER_MAX_SIZE 2048
 
 struct Lexer {
-  FILE *input;
-  char *source;
+  Port *input;
   int line, col;
   int c;
   int size;
@@ -21,15 +21,13 @@ struct Lexer {
 };
 
 Lexer *
-Lexer_new (const char *source)
+Lexer_new (Port *input)
 {
   Lexer *self = NULL;
 
   alloc_one(self);
 
-  self->input = Utils_openFile(source, "r");
-  alloc_(self->source, strlen(source) + 1);
-  strcpy(self->source, source);
+  self->input = input;
   self->line = 1;
   self->col = 0;
   self->c = 0;
@@ -49,7 +47,18 @@ Lexer_delete (Lexer *self)
   free_(self);
 }
 
-  debug_out();
+void
+Lexer_reset (Lexer *self, Port *input)
+{
+  self->input = input;
+  self->line = 1;
+  self->col = 0;
+  self->c = 0;
+  self->size = 0;
+  self->type = TUnkown;
+  memset(self->token, 0, BUFFER_MAX_SIZE);
+  self->number = 0;
+  self->back = false;
 }
 
 /* ----- */
@@ -57,21 +66,21 @@ Lexer_delete (Lexer *self)
 void
 Lexer_error (Lexer *self, char *error)
 {
-  Utils_fatal("Lexer: %s at line %d column %d in %s",
-              error, self->line, self->col, self->source);
+  Utils_error("Lexer: %s at line %d column %d in %s",
+              error, self->line, self->col, Port_name(self->input));
 }
 
 int
 Lexer_getc (Lexer *self)
 {
   self->col++;
-  self->c = getc(self->input);
+  self->c = Port_getc(self->input);
 
   while (self->c == ';') {
-    while (getc(self->input) != '\n');
+    while (Port_getc(self->input) != '\n');
     self->line++;
     self->col = 1;
-    self->c = getc(self->input);
+    self->c = Port_getc(self->input);
   }
 
   return self->c;
@@ -81,7 +90,7 @@ int
 Lexer_ungetc (Lexer *self)
 {
   self->col--;
-  return ungetc(self->c, self->input);
+  return Port_ungetc(self->input, self->c);
 }
 
 void
@@ -268,8 +277,8 @@ Lexer_col (Lexer *self)
   return self->col;
 }
 
-char *
-Lexer_source (Lexer *self)
+Port *
+Lexer_input (Lexer *self)
 {
-  return self->source;
+  return self->input;
 }
