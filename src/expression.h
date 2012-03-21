@@ -5,7 +5,9 @@
 
 typedef struct Expression Expression;
 
-typedef enum { PAIR, SYMBOL, STRING, NUMBER } ExprType;
+typedef enum {
+  PAIR, SYMBOL, STRING, NUMBER
+} ExprType;
 
 Expression *Expression_new (ExprType type, void *expr);
 void Expression_delete (Expression *self);

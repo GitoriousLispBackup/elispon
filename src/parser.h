@@ -1,7 +1,6 @@
 #ifndef PARSER_H__
 #define PARSER_H__
 
-#include <stdio.h>
 #include "expression.h"
 
 typedef struct Parser Parser;

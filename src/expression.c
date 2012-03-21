@@ -74,8 +74,7 @@ Expression_expr (Expression *self)
 bool
 Expression_isNil (Expression *self)
 {
-  return self->type == PAIR
-    && !self->expr;
+  return self->type == PAIR && !self->expr;
 }
 
 bool
@@ -87,7 +86,6 @@ Expression_isAtom (Expression *self)
 bool
 Expression_isValue (Expression *self)
 {
-  return self->type == NUMBER
-    || self->type == STRING
-    || Expression_isNil(self);
+  return self->type == NUMBER || self->type == STRING ||
+    Expression_isNil(self);
 }

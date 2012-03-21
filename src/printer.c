@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <ctype.h>
 #include "utils.h"
 #include "expression.h"
 #include "pair.h"
@@ -47,6 +46,7 @@ void
 Printer_printPair (Printer *self, Pair *pair)
 {
   Printer_printExpression(self, Pair_fst(pair));
+
   if (Expression_type(Pair_snd(pair)) == PAIR) {
     if (!Expression_isNil(Pair_snd(pair))) {
       fprintf(self->output, " ");
