@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "utils.h"
 #include "expression.h"
 #include "pair.h"
@@ -70,20 +71,20 @@ Expression_expr (Expression *self)
 
 /* ----- */
 
-int
+bool
 Expression_isNil (Expression *self)
 {
   return self->type == PAIR
     && !self->expr;
 }
 
-int
+bool
 Expression_isAtom (Expression *self)
 {
   return self->type != PAIR;
 }
 
-int
+bool
 Expression_isValue (Expression *self)
 {
   return self->type == NUMBER
