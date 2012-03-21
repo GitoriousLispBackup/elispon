@@ -14,6 +14,7 @@ struct REPL {
   int pos;
   char buf[BUFFER_MAX_SIZE];
   Parser *parser;
+  Environment *env;
   Printer *printer;
   Expression *expr;
 };
@@ -28,6 +29,7 @@ REPL_new ()
   self->count = 0;
   memset(self->buf, 0, BUFFER_MAX_SIZE);
   self->parser = Parser_new(NULL);
+  self->environment = Environment_new();
   self->printer = Printer_new("/dev/stdout");
   self->expr = NULL;
 
