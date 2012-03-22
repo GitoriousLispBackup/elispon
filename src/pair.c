@@ -40,3 +40,15 @@ Pair_snd (Pair *self)
 {
   return self->snd;
 }
+
+void
+Pair_setFst (Pair *self, Expression *expr)
+{
+  self->fst = expr;
+}
+
+void
+Pair_setSnd (Pair *self, Expression *expr)
+{
+  self->snd = expr;
+}

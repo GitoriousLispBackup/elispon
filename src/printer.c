@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "utils.h"
 #include "expression.h"
+#include "primitive.h"
 #include "pair.h"
 #include "symbol.h"
 #include "string.h"
@@ -34,6 +35,12 @@ Printer_delete (Printer *self)
 }
 
 /* ----- */
+
+static void
+Printer_printPrimitive (Printer *self, Primitive *prim)
+{
+  fprintf(self->output, "#<primitive:%s>", Primitive_name(prim));
+}
 
 static void
 Printer_printPair (Printer *self, Pair *pair)
@@ -77,7 +84,7 @@ Printer_printExpression (Printer *self, Expression *expr)
 {
   switch (Expression_type(expr)) {
   case PRIMITIVE:
-    fprintf(self->output, "#<primitive>");
+    Printer_printPrimitive(self, Expression_expr(expr));
     break;
   case PAIR:
     fprintf(self->output, "(");
@@ -95,7 +102,7 @@ Printer_printExpression (Printer *self, Expression *expr)
     Printer_printNumber(self, Expression_expr(expr));
     break;
   default:
-    Utils_error("Printer_printExpression: unknown expression type.");
+    Utils_error("Printer: unknown expression type.");
   }
 
   fflush(self->output);

@@ -12,6 +12,12 @@ struct Primitive {
   PrimitiveProc proc;
 };
 
+char *
+Primitive_name (Primitive *self)
+{
+  return self->name;
+}
+
 PrimitiveProc
 Primitive_proc (Primitive *self)
 {
@@ -26,8 +32,10 @@ Primitive_proc (Primitive *self)
 #define cddr(e) Expression_cdr(Expression_cdr(e))
 
 Expression *
-PrimitiveProc_define (Expression *args, Environment **env)
+PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
 {
+  Expression *expr = NULL;
+
   if (Expression_isNil(args) || Expression_type(args) != PAIR ||
       Expression_type(cdr(args)) != PAIR || Expression_isNil(cdr(args)) ||
       !Expression_isNil(cddr(args))) {
@@ -38,19 +46,90 @@ PrimitiveProc_define (Expression *args, Environment **env)
     Utils_error("define: expected symbol as first argument");
     return NULL;
   }
-  *env = Environment_add(*env, Expression_expr(car(args)), cadr(args));
+
+  if ((expr = Eval_eval(ev, cadr(args), env)) == NULL)
+    return NULL;
+
+  *env = Environment_add(*env, Expression_expr(car(args)), expr);
+
   return car(args);
 }
 
+Expression *
+PrimitiveProc_cons (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *fst = NULL, *snd = NULL;
+
+  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
+      Expression_type(cdr(args)) != PAIR || Expression_isNil(cdr(args)) ||
+      !Expression_isNil(cddr(args))) {
+    Utils_error("cons: expected two arguments");
+    return NULL;
+  }
+
+  if ((fst = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+  if ((snd = Eval_eval(ev, cadr(args), env)) == NULL)
+    return NULL;
+
+  return Expression_cons(fst, snd);
+}
+
+Expression *
+PrimitiveProc_car (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
+      !Expression_isNil(cdr(args))) {
+    Utils_error("car: expected one pair argument");
+    return NULL;
+  }
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  return Expression_car(expr);
+}
+
+Expression *
+PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
+      !Expression_isNil(cdr(args))) {
+    Utils_error("cdr: expected one pair argument");
+    return NULL;
+  }
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  return Expression_cdr(expr);
+}
+
+Expression *
+PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
+{
+  return Eval_mapEval(ev, args, env);
+}
+
 #undef car
+#undef cdr
+#undef caar
 #undef cadr
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 1
+#define PRIMITIVE_COUNT 5
 
 Primitive prim_[PRIMITIVE_COUNT] = {
-  { "define", PrimitiveProc_define }
+  { "define", PrimitiveProc_define },
+  { "cons",   PrimitiveProc_cons },
+  { "car",    PrimitiveProc_car },
+  { "cdr",    PrimitiveProc_cdr },
+  { "list",   PrimitiveProc_list }
 };
 
 Expression *

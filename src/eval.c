@@ -12,7 +12,6 @@
 
 struct Eval {
   Environment *primitives;
-  bool error;
 };
 
 Eval *
@@ -23,7 +22,6 @@ Eval_new ()
   alloc_one(self);
 
   self->primitives = Primitive_initialEnvironment();
-  self->error = false;
 
   return self;
 }
@@ -36,12 +34,6 @@ Eval_delete (Eval *self)
   free_(self);
 }
 
-void
-Eval_reset (Eval *self)
-{
-  self->error = false;
-}
-
 /* ----- */
 
 static Expression *
@@ -49,17 +41,14 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
 {
   Expression *car = NULL, *expr = NULL;
 
-  car = Eval_eval(self, Pair_fst(pair), env);
-  if (self->error)
+  if ((car = Eval_eval(self, Pair_fst(pair), env)) == NULL)
     return NULL;
   if (!Expression_isCallable(car)) {
     Utils_error("expected procedure");
     return NULL;
   }
 
-  expr = Primitive_proc(Expression_expr(car))(Pair_snd(pair), env);
-  if (expr == NULL)
-    self->error = true;
+  expr = Primitive_proc(Expression_expr(car))(Pair_snd(pair), env, self);
 
   return expr;
 }
@@ -78,11 +67,9 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
 
       if ((e = Environment_find(*env, Expression_expr(expr))) == NULL)
         if ((e = Environment_find(self->primitives,
-                                  Expression_expr(expr))) == NULL) {
+                                  Expression_expr(expr))) == NULL)
           Utils_error("%s: undefined symbol",
                       Symbol_name(Expression_expr(expr)));
-          self->error = true;
-        }
 
       return e;
     }
@@ -91,8 +78,7 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
   case NUMBER:
     return expr;
   default:
-    Utils_error("Eval_eval: unknown expression type");
-    self->error = true;
+    Utils_error("Eval: unknown expression type");
   }
 
   return NULL;
@@ -103,7 +89,25 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
 Expression *
 Eval_eval (Eval *self, Expression *expr, Environment **env)
 {
-  while (!self->error && !Expression_isValue(expr))
-    expr = Eval_evalExpression(self, expr, env);
+  return Eval_evalExpression(self, expr, env);
+}
+
+Expression *
+Eval_mapEval (Eval *self, Expression *expr, Environment **env)
+{
+  Expression *car = NULL, *list = expr;
+
+  while (!Expression_isNil(list)) {
+    if (Expression_type(list) != PAIR) {
+      Utils_error("expected pair");
+      return NULL;
+    }
+    if ((car = Eval_eval(self, Expression_car(list), env)) == NULL)
+      return NULL;
+
+    Expression_setCar(list, car);
+    list = Expression_cdr(list);
+  }
+
   return expr;
 }

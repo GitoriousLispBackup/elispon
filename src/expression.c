@@ -114,3 +114,19 @@ Expression_cdr (Expression *self)
 
   return Pair_snd(Expression_expr(self));
 }
+
+void
+Expression_setCar (Expression *self, Expression *expr)
+{
+  if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
+    Utils_fatal("Expression_setCar: argument is not a pair");
+  Pair_setFst(Expression_expr(self), expr);
+}
+
+void
+Expression_setCdr (Expression *self, Expression *expr)
+{
+  if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
+    Utils_fatal("Expression_setCdr: argument is not a pair");
+  Pair_setSnd(Expression_expr(self), expr);
+}

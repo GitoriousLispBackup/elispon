@@ -47,7 +47,7 @@ REPL_delete (REPL *self)
   if (self == NULL) return;
   free_(self);
 
-  printf("\n\nBye.\n");
+  printf("\nBye.\n");
 }
 
 REPL *
@@ -104,7 +104,6 @@ REPL_eval (REPL *self)
 {
   if (self == NULL || self->expr == NULL) return NULL;
 
-  Eval_reset(self->eval);
   self->expr = Eval_eval(self->eval, self->expr, &self->env);
 
   return self;

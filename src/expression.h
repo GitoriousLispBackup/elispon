@@ -22,5 +22,7 @@ bool Expression_isCallable (Expression *self);
 Expression *Expression_cons (Expression *car, Expression *cdr);
 Expression *Expression_car (Expression *self);
 Expression *Expression_cdr (Expression *self);
+void Expression_setCar (Expression *self, Expression *expr);
+void Expression_setCdr (Expression *self, Expression *expr);
 
 #endif /* EXPRESSION_H__ */
