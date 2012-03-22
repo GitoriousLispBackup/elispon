@@ -26,10 +26,10 @@ Primitive_proc (Primitive *self)
 
 /* ----- */
 
-#define car(e) Expression_car(e)
-#define cdr(e) Expression_cdr(e)
-#define cadr(e) Expression_car(Expression_cdr(e))
-#define cddr(e) Expression_cdr(Expression_cdr(e))
+#define car(e)  (Expression_car(e))
+#define cdr(e)  (Expression_cdr(e))
+#define cadr(e) (Expression_car(Expression_cdr(e)))
+#define cddr(e) (Expression_cdr(Expression_cdr(e)))
 
 Expression *
 PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
@@ -115,6 +115,30 @@ PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
   return Eval_mapEval(ev, args, env);
 }
 
+Expression *
+PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
+{
+  return *env;
+}
+
+Expression *
+PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
+{
+  Environment *environment = NULL;
+
+  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
+      Expression_type(cdr(args)) != PAIR || Expression_isNil(cdr(args)) ||
+      !Expression_isNil(cddr(args))) {
+    Utils_error("eval: expected two arguments");
+    return NULL;
+  }
+
+  if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
+    return NULL;
+
+  return Eval_eval(ev, car(args), &environment);
+}
+
 #undef car
 #undef cdr
 #undef caar
@@ -122,14 +146,16 @@ PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 5
+#define PRIMITIVE_COUNT 7
 
 Primitive prim_[PRIMITIVE_COUNT] = {
-  { "define", PrimitiveProc_define },
-  { "cons",   PrimitiveProc_cons },
-  { "car",    PrimitiveProc_car },
-  { "cdr",    PrimitiveProc_cdr },
-  { "list",   PrimitiveProc_list }
+  { "define",      PrimitiveProc_define },
+  { "cons",        PrimitiveProc_cons },
+  { "car",         PrimitiveProc_car },
+  { "cdr",         PrimitiveProc_cdr },
+  { "list",        PrimitiveProc_list },
+  { "environment", PrimitiveProc_environment },
+  { "eval",        PrimitiveProc_eval }
 };
 
 Expression *
