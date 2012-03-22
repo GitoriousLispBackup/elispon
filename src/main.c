@@ -8,7 +8,7 @@ main (int argc, char *argv[])
 
   repl = REPL_new();
 
-  while(REPL_print(REPL_eval(REPL_read(repl))));
+  while (REPL_print(REPL_eval(REPL_read(repl))));
 
   REPL_delete(repl);
 

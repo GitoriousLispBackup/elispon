@@ -28,7 +28,6 @@
 FILE *Utils_openFile (const char *path, const char *mode);
 void Utils_closeFile (FILE *f);
 
-void Utils_log (const char *format, ...);
 void Utils_error (const char *format, ...);
 void Utils_fatal (const char *format, ...);
 

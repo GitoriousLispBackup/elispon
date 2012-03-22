@@ -24,23 +24,12 @@ Utils_closeFile (FILE *f)
 /* ----- */
 
 void
-Utils_log (const char *format, ...)
-{
-  va_list ap;
-  va_start(ap, format);
-
-  fprintf(stdout, "(ε) ");
-  vfprintf(stdout, format, ap);
-  fprintf(stdout, "\n");
-}
-
-void
 Utils_error (const char *format, ...)
 {
   va_list ap;
   va_start(ap, format);
 
-  fprintf(stderr, "(ε) Error: ");
+  fprintf(stderr, "Error: ");
   vfprintf(stderr, format, ap);
   fprintf(stderr, "\n");
 }
@@ -51,7 +40,7 @@ Utils_fatal (const char *format, ...)
   va_list ap;
   va_start(ap, format);
 
-  fprintf(stderr, "(ε) Fatal error: ");
+  fprintf(stderr, "Fatal error: ");
   vfprintf(stderr, format, ap);
   fprintf(stderr, "\n");
 
