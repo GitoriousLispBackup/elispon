@@ -11,9 +11,13 @@ struct Token {
   char *source;
 }
 and most of this information should be keeped at least until expansion time is
-   over, maybe during runtime too to report fexpr error.
+over, maybe during runtime too to report fexpr error if the project goes this
+way
 
-
-
+---
 
 Printer should use Port (Port must support printf)
+
+---
+
+Check with valgrind where there are memory leak during runtime
