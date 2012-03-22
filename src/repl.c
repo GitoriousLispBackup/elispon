@@ -4,6 +4,7 @@
 #include "port.h"
 #include "expression.h"
 #include "parser.h"
+#include "eval.h"
 #include "printer.h"
 #include "repl.h"
 
@@ -15,6 +16,7 @@ struct REPL {
   char buf[BUFFER_MAX_SIZE];
   Parser *parser;
   Environment *env;
+  Eval *eval;
   Printer *printer;
   Expression *expr;
 };
@@ -29,7 +31,8 @@ REPL_new ()
   self->count = 0;
   memset(self->buf, 0, BUFFER_MAX_SIZE);
   self->parser = Parser_new(NULL);
-  self->environment = Environment_new();
+  self->env = Environment_new();
+  self->eval = Eval_new();
   self->printer = Printer_new("/dev/stdout");
   self->expr = NULL;
 
@@ -99,7 +102,11 @@ REPL_read (REPL *self)
 REPL *
 REPL_eval (REPL *self)
 {
-  if (self == NULL) return NULL;
+  if (self == NULL || self->expr == NULL) return NULL;
+
+  Eval_reset(self->eval);
+  self->expr = Eval_eval(self->eval, self->expr, &self->env);
+
   return self;
 }
 

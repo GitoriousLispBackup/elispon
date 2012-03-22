@@ -6,6 +6,7 @@
 #include "symbol.h"
 #include "string.h"
 #include "number.h"
+#include "primitive.h"
 #include "lexer.h"
 #include "parser.h"
 
@@ -24,7 +25,7 @@ Parser_new (Port *input)
   alloc_one(self);
 
   self->lexer = Lexer_new(input);
-  self->symbols = Expression_new(PAIR, NULL);
+  self->symbols = Primitive_initialSymbols();
   self->depth = 0;
   self->error = false;
 
@@ -50,7 +51,7 @@ Parser_reset (Parser *self, Port *input)
 
 /* ----- */
 
-void *
+static void *
 Parser_error (Parser *self, char *error)
 {
   Utils_error("Parser: %s at line %d column %d in %s",

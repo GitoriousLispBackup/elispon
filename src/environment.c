@@ -19,7 +19,7 @@ Environment_delete (Environment *self)
 /* ----- */
 
 #define caar(e) Expression_expr(Expression_car(Expression_car(e)))
-#define cdar(e) Expression_expr(Expression_cdr(Expression_car(e)))
+#define cdar(e) Expression_cdr(Expression_car(e))
 
 Expression *
 Environment_find (Environment *self, Symbol *sym)
@@ -39,7 +39,7 @@ Environment_find (Environment *self, Symbol *sym)
 #undef cdar
 
 Environment *
-Environment_set (Environment *self, Symbol *sym, Expression *expr)
+Environment_add (Environment *self, Symbol *sym, Expression *expr)
 {
   return (Environment *)
     Expression_cons(Expression_cons(Expression_new(SYMBOL, sym), expr), self);

@@ -29,6 +29,8 @@ Expression_delete (Expression *self)
 {
   if (self == NULL) return;
   switch (self->type) {
+  case PRIMITIVE:
+    break;
   case PAIR:
     if (self->expr != NULL) Pair_delete(self->expr);
     break;
@@ -80,7 +82,13 @@ bool
 Expression_isValue (Expression *self)
 {
   return self->type == NUMBER || self->type == STRING ||
-    Expression_isNil(self);
+    self->type == PRIMITIVE || Expression_isNil(self);
+}
+
+bool
+Expression_isCallable (Expression *self)
+{
+  return self->type == PRIMITIVE;
 }
 
 Expression *
@@ -93,7 +101,7 @@ Expression *
 Expression_car (Expression *self)
 {
   if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
-    Utils_fatal("Utils_car: argument is not a pair");
+    Utils_fatal("Expression_car: argument is not a pair");
 
   return Pair_fst(Expression_expr(self));
 }
@@ -102,7 +110,7 @@ Expression *
 Expression_cdr (Expression *self)
 {
   if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
-    Utils_fatal("Utils_car: argument is not a pair");
+    Utils_fatal("Expression_car: argument is not a pair");
 
   return Pair_snd(Expression_expr(self));
 }

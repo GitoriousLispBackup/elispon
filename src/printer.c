@@ -76,6 +76,9 @@ void
 Printer_printExpression (Printer *self, Expression *expr)
 {
   switch (Expression_type(expr)) {
+  case PRIMITIVE:
+    fprintf(self->output, "#<primitive>");
+    break;
   case PAIR:
     fprintf(self->output, "(");
     if (!Expression_isNil(expr))
