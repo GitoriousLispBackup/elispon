@@ -4,9 +4,11 @@
 #include "environment.h"
 
 Environment *
-Environment_new ()
+Environment_new (Environment *base)
 {
-  return (Environment *) Expression_new(PAIR, NULL);
+  if (base == NULL)
+    return (Environment *) Expression_new(PAIR, NULL);
+  return base;
 }
 
 void

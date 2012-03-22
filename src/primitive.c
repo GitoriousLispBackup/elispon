@@ -186,7 +186,7 @@ Primitive_initialEnvironment ()
   if (env != NULL)
     return env;
 
-  env = Environment_new();
+  env = Environment_new(NULL);
   symbols = Primitive_initialSymbols();
   for (i = 0; i < PRIMITIVE_COUNT; i++) {
     env = Environment_add(env, Utils_findSymbol(symbols, prim_[i].name),

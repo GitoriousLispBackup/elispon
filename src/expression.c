@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include "utils.h"
 #include "expression.h"
+#include "primitive.h"
 #include "pair.h"
 #include "symbol.h"
 #include "string.h"
@@ -27,26 +28,39 @@ Expression_new (ExprType type, void *expr)
 void
 Expression_delete (Expression *self)
 {
+  static int i = 0;
+  int j;
+
   if (self == NULL) return;
+  for (j = 0; j < i; j++) printf("  ");
   switch (self->type) {
   case PRIMITIVE:
+    printf("deleting primitive %s\n", Primitive_name(self->expr));
     break;
   case PAIR:
-    if (self->expr != NULL) Pair_delete(self->expr);
+    printf("deleting pair %d\n", i);
+    if (self->expr != NULL) {
+      i++;
+      Pair_delete(self->expr);
+      i--;
+    }
     break;
   case SYMBOL:
+    printf("deleting symbol %s\n", Symbol_name(self->expr));
     Symbol_delete(self->expr);
     break;
   case STRING:
+    printf("deleting string %s\n", String_buf(self->expr));
     String_delete(self->expr);
     break;
   case NUMBER:
+    printf("deleting number %g\n", Number_val(self->expr));
     Number_delete(self->expr);
     break;
   default:
-    Utils_error("Expression_delete: unknown expression type.");
+    printf("fatal\n");
+    Utils_fatal("%d Expression_delete: unknown expression type.", i);
   }
-
   free_(self);
 }
 

@@ -15,13 +15,13 @@ struct Eval {
 };
 
 Eval *
-Eval_new ()
+Eval_new (Environment *primitives)
 {
   Eval *self = NULL;
 
   alloc_one(self);
 
-  self->primitives = Primitive_initialEnvironment();
+  self->primitives = primitives;
 
   return self;
 }
@@ -30,7 +30,6 @@ void
 Eval_delete (Eval *self)
 {
   if (self == NULL) return;
-  Environment_delete(self->primitives);
   free_(self);
 }
 

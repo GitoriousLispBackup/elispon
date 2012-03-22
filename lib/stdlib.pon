@@ -1,0 +1,3 @@
+(define nil ())
+;(define cdr car)
+(define stdlib (environment))

@@ -15,14 +15,14 @@ struct REPL {
   int pos;
   char buf[BUFFER_MAX_SIZE];
   Parser *parser;
-  Environment *env;
   Eval *eval;
+  Environment *env;
   Printer *printer;
   Expression *expr;
 };
 
 REPL *
-REPL_new ()
+REPL_new (Parser *parser, Eval *eval, Environment *env)
 {
   REPL *self = NULL;
 
@@ -30,9 +30,9 @@ REPL_new ()
 
   self->count = 0;
   memset(self->buf, 0, BUFFER_MAX_SIZE);
-  self->parser = Parser_new(NULL);
-  self->env = Environment_new();
-  self->eval = Eval_new();
+  self->parser = parser;
+  self->eval = eval;
+  self->env = env;
   self->printer = Printer_new("/dev/stdout");
   self->expr = NULL;
 
@@ -45,6 +45,7 @@ void
 REPL_delete (REPL *self)
 {
   if (self == NULL) return;
+  Printer_delete(self->printer);
   free_(self);
 
   printf("\nBye.\n");

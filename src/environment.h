@@ -6,7 +6,7 @@
 
 typedef struct Expression Environment;
 
-Environment *Environment_new ();
+Environment *Environment_new (Environment *base);
 void Environment_delete (Environment *self);
 
 Expression *Environment_find (Environment *self, Symbol *sym);

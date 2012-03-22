@@ -1,9 +1,13 @@
 #ifndef REPL_H__
 #define REPL_H__
 
+#include "parser.h"
+#include "eval.h"
+#include "environment.h"
+
 typedef struct REPL REPL;
 
-REPL *REPL_new ();
+REPL *REPL_new (Parser *parser, Eval *eval, Environment *env);
 void REPL_delete (REPL *self);
 
 REPL *REPL_read (REPL *self);

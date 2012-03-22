@@ -18,14 +18,14 @@ struct Parser {
 };
 
 Parser *
-Parser_new (Port *input)
+Parser_new (Port *input, Expression *symbols)
 {
   Parser *self = NULL;
 
   alloc_one(self);
 
   self->lexer = Lexer_new(input);
-  self->symbols = Primitive_initialSymbols();
+  self->symbols = symbols;
   self->depth = 0;
   self->error = false;
 
@@ -37,7 +37,6 @@ Parser_delete (Parser *self)
 {
   if (self == NULL) return;
   Lexer_delete(self->lexer);
-  Expression_delete(self->symbols);
   free_(self);
 }
 
