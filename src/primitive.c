@@ -132,6 +132,11 @@ PrimitiveProc_car (Expression *args, Environment **env, Eval *ev)
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
 
+  if (Expression_type(expr) != PAIR || Expression_isNil(expr)) {
+    Utils_error("car: expected pair");
+    return NULL;
+  }
+
   return Expression_car(expr);
 }
 
@@ -144,6 +149,11 @@ PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
+
+  if (Expression_type(expr) != PAIR || Expression_isNil(expr)) {
+    Utils_error("cdr: expected pair");
+    return NULL;
+  }
 
   return Expression_cdr(expr);
 }
