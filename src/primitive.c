@@ -263,6 +263,28 @@ PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
+PrimitiveHelper_typep (char *name, ExprType type,
+                       Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+
+  nb_args(name, 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == type)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+static Expression *
+PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("primitive?", PRIMITIVE, args, env, ev);
+}
+
+static Expression *
 PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
 {
   Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
@@ -280,61 +302,25 @@ PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("symbol?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == SYMBOL)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
+  return PrimitiveHelper_typep("symbol?", SYMBOL, args, env, ev);
 }
 
 static Expression *
 PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("number?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == NUMBER)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
+  return PrimitiveHelper_typep("number?", NUMBER, args, env, ev);
 }
 
 static Expression *
 PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("string?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == STRING)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
+  return PrimitiveHelper_typep("string?", STRING, args, env, ev);
 }
 
 static Expression *
-PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
+PrimitiveProc_fexprp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("primitive?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == PRIMITIVE)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
+  return PrimitiveHelper_typep("fexpr?", FEXPR, args, env, ev);
 }
 
 /* --- */
