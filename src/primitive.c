@@ -51,7 +51,7 @@ Primitive_proc (Primitive *self)
 static Expression *
 PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *expr = NULL;
+  Expression *expr = NULL, *tmp = NULL;
 
   nb_args("define", 2, args);
   if (Expression_type(car(args)) != SYMBOL) {
@@ -59,10 +59,14 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
     return NULL;
   }
 
+  tmp = Expression_new(PAIR, NULL);
+  *env = Environment_add(*env, Expression_expr(car(args)), tmp);
+
   if ((expr = Eval_eval(ev, cadr(args), env)) == NULL)
     return NULL;
 
-  *env = Environment_add(*env, Expression_expr(car(args)), expr);
+  Expression_setType(tmp, Expression_type(expr));
+  Expression_setExpr(tmp, Expression_expr(expr));
 
   return car(args);
 }
