@@ -375,16 +375,16 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *expr = NULL;
+  Expression *expr = NULL, *arguments = NULL;
 
   nb_args("apply", 2, args);
 
-  if ((expr = Eval_eval(ev, cadr(args), env)) == NULL)
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+  if ((arguments = Eval_eval(ev, cadr(args), env)) == NULL)
     return NULL;
 
-  Expression_setCdr(args, expr);
-
-  return Eval_eval(ev, args, env);
+  return Eval_eval(ev, Expression_cons(expr, arguments), env);
 }
 
 #undef car
