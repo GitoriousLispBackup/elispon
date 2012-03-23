@@ -6,6 +6,7 @@
 #include "symbol.h"
 #include "string.h"
 #include "number.h"
+#include "fexpr.h"
 #include "printer.h"
 
 struct Printer {
@@ -79,6 +80,12 @@ Printer_printNumber (Printer *self, Number *num)
   fprintf(self->output, "%g", Number_val(num));
 }
 
+static void
+Printer_printFexpr (Printer *self, Fexpr *fexpr)
+{
+  fprintf(self->output, "#<fexpr>");
+}
+
 void
 Printer_printExpression (Printer *self, Expression *expr)
 {
@@ -100,6 +107,9 @@ Printer_printExpression (Printer *self, Expression *expr)
     break;
   case NUMBER:
     Printer_printNumber(self, Expression_expr(expr));
+    break;
+  case FEXPR:
+    Printer_printFexpr(self, Expression_expr(expr));
     break;
   default:
     Utils_error("Printer: unknown expression type.");

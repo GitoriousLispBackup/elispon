@@ -3,7 +3,9 @@
 #include "utils.h"
 #include "expression.h"
 #include "symbol.h"
+#include "string.h"
 #include "number.h"
+#include "fexpr.h"
 #include "environment.h"
 #include "eval.h"
 #include "primitive.h"
@@ -44,7 +46,7 @@ Primitive_proc (Primitive *self)
 #define car(e)  (Expression_car(e))
 #define cdr(e)  (Expression_cdr(e))
 #define cadr(e) (Expression_car(Expression_cdr(e)))
-#define cddr(e) (Expression_cdr(Expression_cdr(e)))
+#define caddr(e) (Expression_car(Expression_cdr(Expression_cdr(e))))
 
 static Expression *
 PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
@@ -240,7 +242,7 @@ PrimitiveProc_if (Expression *args, Environment **env, Eval *ev)
 
   if (!Expression_isNil(cond))
     return Eval_eval(ev, cadr(args), env);
-  return Eval_eval(ev, cadr(cdr(args)), env);
+  return Eval_eval(ev, caddr(args), env);
 }
 
 /* --- */
@@ -338,6 +340,25 @@ PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
 /* --- */
 
 static Expression *
+PrimitiveProc_epsilon (Expression *args, Environment **env, Eval *ev)
+{
+  min_nb_args("ε", 3, args);
+
+  if (Expression_type(car(args)) != SYMBOL ||
+      Expression_type(cadr(args)) != SYMBOL ||
+      Expression_expr(car(args)) == Expression_expr(cadr(args))) {
+    Utils_error("ε: expected the first two arguments to be different symbols");
+    return NULL;
+  }
+
+  return Expression_new(FEXPR, Fexpr_new(Expression_expr(car(args)),
+                                         Expression_expr(cadr(args)),
+                                         caddr(args), *env));
+}
+
+/* --- */
+
+static Expression *
 PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 {
   nb_args("environment", 0, args);
@@ -348,26 +369,29 @@ PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 {
+  Expression *expr = NULL; 
   Environment *environment = NULL;
 
   nb_args("eval", 2, args);
 
   if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
     return NULL;
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
 
-  return Eval_eval(ev, car(args), &environment);
+  return Eval_eval(ev, expr, &environment);
 }
 
 #undef car
 #undef cdr
-#undef caar
 #undef cadr
+#undef caddr
 
 #undef nb_args
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 24
+#define PRIMITIVE_COUNT 23
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",      PrimitiveProc_define },
@@ -391,9 +415,11 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "null?",       PrimitiveProc_nullp },
   { "pair?",       PrimitiveProc_pairp },
   { "symbol?",     PrimitiveProc_symbolp },
-  { "number?",     PrimitiveProc_numberp },
   { "string?",     PrimitiveProc_stringp },
+  { "number?",     PrimitiveProc_numberp },
   { "primitive?",  PrimitiveProc_primitivep },
+
+  { "ε",           PrimitiveProc_epsilon },
 
   { "environment", PrimitiveProc_environment },
   { "eval",        PrimitiveProc_eval }

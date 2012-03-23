@@ -6,6 +6,7 @@
 #include "symbol.h"
 #include "string.h"
 #include "number.h"
+#include "fexpr.h"
 
 struct Expression {
   ExprType type;
@@ -57,6 +58,9 @@ Expression_delete (Expression *self)
     printf("deleting number %g\n", Number_val(self->expr));
     Number_delete(self->expr);
     break;
+  case FEXPR:
+    printf("deleting fexpr\n");
+    Fexpr_delete(self->expr);
   default:
     printf("fatal\n");
     Utils_fatal("%d Expression_delete: unknown expression type.", i);
@@ -89,7 +93,7 @@ Expression_isNil (Expression *self)
 bool
 Expression_isCallable (Expression *self)
 {
-  return self->type == PRIMITIVE;
+  return self->type == PRIMITIVE || self->type == FEXPR;
 }
 
 Expression *

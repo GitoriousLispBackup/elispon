@@ -2,11 +2,12 @@
 #include <stdbool.h>
 #include "utils.h"
 #include "expression.h"
+#include "primitive.h"
 #include "pair.h"
 #include "symbol.h"
 #include "string.h"
 #include "number.h"
-#include "primitive.h"
+#include "fexpr.h"
 #include "environment.h"
 #include "eval.h"
 
@@ -38,18 +39,24 @@ Eval_delete (Eval *self)
 static Expression *
 Eval_evalPair (Eval *self, Pair *pair, Environment **env)
 {
-  Expression *car = NULL, *expr = NULL;
+  Expression *f = NULL;
+  Environment *e = NULL;
 
-  if ((car = Eval_eval(self, Pair_fst(pair), env)) == NULL)
+  if ((f = Eval_eval(self, Pair_fst(pair), env)) == NULL)
     return NULL;
-  if (!Expression_isCallable(car)) {
-    Utils_error("expected procedure");
+  if (!Expression_isCallable(f)) {
+    Utils_error("expected primitive procedure or fexpr");
     return NULL;
   }
 
-  expr = Primitive_proc(Expression_expr(car))(Pair_snd(pair), env, self);
+  if (Expression_type(f) == PRIMITIVE)
+    return Primitive_proc(Expression_expr(f))(Pair_snd(pair), env, self);
 
-  return expr;
+  e = Fexpr_lexenv(Expression_expr(f));
+  e = Environment_add(e, Fexpr_arg(Expression_expr(f)), Pair_snd(pair));
+  e = Environment_add(e, Fexpr_dynenv(Expression_expr(f)), *env);
+
+  return Eval_eval(self, Fexpr_body(Expression_expr(f)), &e);
 }
 
 static Expression *
@@ -75,6 +82,7 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
   case PRIMITIVE:
   case STRING:
   case NUMBER:
+  case FEXPR:
     return expr;
   default:
     Utils_error("Eval: unknown expression type");
