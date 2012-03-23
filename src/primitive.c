@@ -364,9 +364,9 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 
   nb_args("eval", 2, args);
 
-  if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
-    return NULL;
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+  if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
     return NULL;
 
   return Eval_eval(ev, expr, &environment);
