@@ -16,7 +16,8 @@ way
 
 ---
 
-Printer should use Port (Port must support printf)
+Printer should use Port
+(Port must support printf) <-- done
 
 ---
 
@@ -27,3 +28,5 @@ Check with valgrind where there are memory leak during runtime
 Fix the problem with Environment_delete which fail when trying to delete the
    same thing two times (some stuff like symbols might appear several time
    there)
+
+=> go for a mark-and-sweep GC ?

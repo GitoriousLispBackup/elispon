@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 #include "utils.h"
 #include "port.h"
 
@@ -32,7 +33,7 @@ Port_newFile (FILE *file, const char name[PORT_NAME_MAX_SIZE])
 }
 
 Port *
-Port_newBuffer (char *buf, const char name[PORT_NAME_MAX_SIZE])
+Port_newBuffer (char *buf, int size, const char name[PORT_NAME_MAX_SIZE])
 {
   Port *self = NULL;
 
@@ -41,7 +42,7 @@ Port_newBuffer (char *buf, const char name[PORT_NAME_MAX_SIZE])
   self->type = PBUF;
   self->file = NULL;
   self->pos = 0;
-  self->size = strlen(buf) + 1;
+  self->size = size + 1;
   alloc_(self->buf, self->size);
   strcpy(self->buf, buf);
   strncpy(self->name, name, PORT_NAME_MAX_SIZE);
@@ -110,4 +111,27 @@ Port_ungetc (Port *self, int c)
   }
 
   return EOF;
+}
+
+int
+Port_printf (Port *self, const char *format, ...)
+{
+  va_list ap;
+  va_start(ap, format);
+
+  switch (self->type) {
+  case PFILE:
+    return vfprintf(self->file, format, ap);
+  case PBUF:
+    {
+      int n = vsnprintf(self->buf + self->pos, self->size - self->pos,
+                        format, ap);
+      self->pos += n;
+      return n;
+    }
+  default:
+    Utils_fatal("Port_printf: unknown port type.");
+  }
+
+  return 0;
 }

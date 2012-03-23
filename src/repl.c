@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 #include "utils.h"
 #include "port.h"
@@ -92,7 +93,7 @@ REPL_read (REPL *self)
   self->buf[self->pos] = '\0';
 
   sprintf(name, "repl:%d", self->count);
-  in = Port_newBuffer(self->buf, name);
+  in = Port_newBuffer(self->buf, strlen(self->buf), name);
   Parser_reset(self->parser, in);
   self->expr = Parser_parseOneExpression(self->parser);
   Port_delete(in);
