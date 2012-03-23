@@ -44,7 +44,7 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
   if ((f = Eval_eval(self, Pair_fst(pair), env)) == NULL)
     return NULL;
   if (!Expression_isCallable(f)) {
-    Utils_error("expected primitive procedure or fexpr, given a %s",
+    Utils_error("expected primitive or fexpr, given a %s",
                 Expression_typeName(f));
     return NULL;
   }
@@ -106,35 +106,4 @@ Expression *
 Eval_eval (Eval *self, Expression *expr, Environment **env)
 {
   return Eval_evalExpression(self, expr, env);
-}
-
-Expression *
-Eval_mapEval (Eval *self, Expression *expr, Environment **env)
-{
-  Expression *car = NULL, *list = NULL, *tmp = NULL;
-
-  list = expr;
-  tmp = Expression_new(PAIR, NULL);
-  while (!Expression_isNil(list)) {
-    if (Expression_type(list) != PAIR) {
-      Utils_error("expected pair");
-      return NULL;
-    }
-    if ((car = Eval_eval(self, Expression_car(list), env)) == NULL)
-      return NULL;
-
-    tmp = Expression_cons(car, tmp);
-    list = Expression_cdr(list);
-  }
-
-  list = tmp;
-  car = Expression_new(PAIR, NULL);
-  while (!Expression_isNil(list)) {
-    tmp = Expression_cdr(list);
-    Expression_setCdr(list, car);
-    car = list;
-    list = tmp;
-  }
-
-  return car;
 }

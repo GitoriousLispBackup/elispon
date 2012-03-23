@@ -71,6 +71,40 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
   return car(args);
 }
 
+static Expression *
+PrimitiveProc_sequence (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  while (!Expression_isNil(args)) {
+    if (Expression_type(args) != PAIR) {
+      Utils_error("sequence: expected proper list");
+      return NULL;
+    }
+    if ((expr = Eval_eval(ev, Expression_car(args), env)) == NULL)
+      return NULL;
+
+    args = Expression_cdr(args);
+  }
+
+  return expr;
+}
+
+static Expression *
+PrimitiveProc_if (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *cond = NULL;
+
+  nb_args("if", 3, args);
+
+  if ((cond = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (!Expression_isNil(cond))
+    return Eval_eval(ev, cadr(args), env);
+  return Eval_eval(ev, caddr(args), env);
+}
+
 /* --- */
 
 static Expression *
@@ -117,7 +151,32 @@ PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
 {
-  return Eval_mapEval(ev, args, env);
+  Expression *expr = NULL, *list = NULL, *tmp = NULL;
+
+  list = args;
+  tmp = Expression_new(PAIR, NULL);
+  while (!Expression_isNil(list)) {
+    if (Expression_type(list) != PAIR) {
+      Utils_error("list: expected proper list");
+      return NULL;
+    }
+    if ((expr = Eval_eval(ev, Expression_car(list), env)) == NULL)
+      return NULL;
+
+    tmp = Expression_cons(expr, tmp);
+    list = Expression_cdr(list);
+  }
+
+  list = tmp;
+  expr = Expression_new(PAIR, NULL);
+  while (!Expression_isNil(list)) {
+    tmp = Expression_cdr(list);
+    Expression_setCdr(list, expr);
+    expr = list;
+    list = tmp;
+  }
+
+  return expr;
 }
 
 static Expression *
@@ -230,23 +289,6 @@ PrimitiveProc_equal (Expression *args, Environment **env, Eval *ev)
   if (Number_val(Expression_expr(expr)))
     return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
   return Expression_new(PAIR, NULL);
-}
-
-/* --- */
-
-static Expression *
-PrimitiveProc_if (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *cond = NULL;
-
-  nb_args("if", 3, args);
-
-  if ((cond = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (!Expression_isNil(cond))
-    return Eval_eval(ev, cadr(args), env);
-  return Eval_eval(ev, caddr(args), env);
 }
 
 /* --- */
@@ -396,10 +438,12 @@ PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 25
+#define PRIMITIVE_COUNT 26
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",      PrimitiveProc_define },
+  { "sequence",    PrimitiveProc_sequence },
+  { "if",          PrimitiveProc_if },
 
   { "cons",        PrimitiveProc_cons },
   { "car",         PrimitiveProc_car },
@@ -414,8 +458,6 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "div",         PrimitiveProc_idiv },
   { "mod",         PrimitiveProc_mod },
   { "=",           PrimitiveProc_equal },
-
-  { "if",          PrimitiveProc_if },
 
   { "null?",       PrimitiveProc_nullp },
   { "primitive?",  PrimitiveProc_primitivep },
