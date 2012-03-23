@@ -59,6 +59,102 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
 }
 
 Expression *
+PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols();
+  Expression *expr = NULL;
+
+  nb_args("null?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_isNil(expr))
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+Expression *
+PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols();
+  Expression *expr = NULL;
+
+  nb_args("pair?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == PAIR && !Expression_isNil(expr))
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+Expression *
+PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols();
+  Expression *expr = NULL;
+
+  nb_args("symbol?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == SYMBOL)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+Expression *
+PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols();
+  Expression *expr = NULL;
+
+  nb_args("number?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == NUMBER)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+Expression *
+PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols();
+  Expression *expr = NULL;
+
+  nb_args("string?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == STRING)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+Expression *
+PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols();
+  Expression *expr = NULL;
+
+  nb_args("primitive?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == PRIMITIVE)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+Expression *
 PrimitiveProc_cons (Expression *args, Environment **env, Eval *ev)
 {
   Expression *fst = NULL, *snd = NULL;
@@ -148,10 +244,16 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 8
+#define PRIMITIVE_COUNT 14
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",      PrimitiveProc_define },
+  { "null?",       PrimitiveProc_nullp },
+  { "pair?",       PrimitiveProc_pairp },
+  { "symbol?",     PrimitiveProc_symbolp },
+  { "number?",     PrimitiveProc_numberp },
+  { "string?",     PrimitiveProc_stringp },
+  { "primitive?",  PrimitiveProc_primitivep },
   { "cons",        PrimitiveProc_cons },
   { "car",         PrimitiveProc_car },
   { "cdr",         PrimitiveProc_cdr },
@@ -175,6 +277,8 @@ Primitive_initialSymbols ()
     symbols = Expression_cons(Expression_new(PAIR, Symbol_new(prim_[i].name)),
                               symbols);
   }
+  symbols = Expression_cons(Expression_new(PAIR, Symbol_new("t")),
+                            symbols);
 
   return symbols;
 }
@@ -184,6 +288,7 @@ Primitive_initialEnvironment ()
 {
   static Environment *env = NULL;
   Expression *symbols = NULL;
+  Symbol *t = NULL;
   int i;
 
   if (env != NULL)
@@ -195,6 +300,8 @@ Primitive_initialEnvironment ()
     env = Environment_add(env, Utils_findSymbol(symbols, prim_[i].name),
                           Expression_new(PRIMITIVE, &prim_[i]));
   }
+  t = Utils_findSymbol(symbols, "t");
+  env = Environment_add(env, t, Expression_new(SYMBOL, t));
 
   return env;
 }
