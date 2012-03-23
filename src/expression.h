@@ -16,8 +16,6 @@ ExprType Expression_type (Expression *self);
 void *Expression_expr (Expression *self);
 
 bool Expression_isNil (Expression *self);
-bool Expression_isAtom (Expression *self);
-bool Expression_isValue (Expression *self);
 bool Expression_isCallable (Expression *self);
 Expression *Expression_cons (Expression *car, Expression *cdr);
 Expression *Expression_car (Expression *self);

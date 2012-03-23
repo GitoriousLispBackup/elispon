@@ -87,19 +87,6 @@ Expression_isNil (Expression *self)
 }
 
 bool
-Expression_isAtom (Expression *self)
-{
-  return self->type != PAIR;
-}
-
-bool
-Expression_isValue (Expression *self)
-{
-  return self->type == NUMBER || self->type == STRING ||
-    self->type == PRIMITIVE || Expression_isNil(self);
-}
-
-bool
 Expression_isCallable (Expression *self)
 {
   return self->type == PRIMITIVE;
