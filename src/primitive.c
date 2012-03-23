@@ -439,6 +439,25 @@ PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
   return Eval_eval(ev, Expression_cons(expr, arguments), env);
 }
 
+static Expression *
+PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("%open-fexpr%", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != FEXPR) {
+    Utils_error("car: expected fexpr");
+    return NULL;
+  }
+
+  return Expression_cons(Fexpr_body(Expression_expr(expr)),
+                         Fexpr_lexenv(Expression_expr(expr)));
+}
+
 #undef car
 #undef cdr
 #undef cadr
@@ -448,40 +467,42 @@ PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 26
+#define PRIMITIVE_COUNT 27
 
 Primitive prim_[PRIMITIVE_COUNT] = {
-  { "define",      PrimitiveProc_define },
-  { "sequence",    PrimitiveProc_sequence },
-  { "if",          PrimitiveProc_if },
+  { "define",       PrimitiveProc_define },
+  { "sequence",     PrimitiveProc_sequence },
+  { "if",           PrimitiveProc_if },
 
-  { "cons",        PrimitiveProc_cons },
-  { "car",         PrimitiveProc_car },
-  { "cdr",         PrimitiveProc_cdr },
-  { "list",        PrimitiveProc_list },
-  { "length",      PrimitiveProc_length },
+  { "cons",         PrimitiveProc_cons },
+  { "car",          PrimitiveProc_car },
+  { "cdr",          PrimitiveProc_cdr },
+  { "list",         PrimitiveProc_list },
+  { "length",       PrimitiveProc_length },
 
-  { "+",           PrimitiveProc_add },
-  { "-",           PrimitiveProc_sub },
-  { "*",           PrimitiveProc_mul },
-  { "/",           PrimitiveProc_div },
-  { "div",         PrimitiveProc_idiv },
-  { "mod",         PrimitiveProc_mod },
-  { "=",           PrimitiveProc_equal },
+  { "+",            PrimitiveProc_add },
+  { "-",            PrimitiveProc_sub },
+  { "*",            PrimitiveProc_mul },
+  { "/",            PrimitiveProc_div },
+  { "div",          PrimitiveProc_idiv },
+  { "mod",          PrimitiveProc_mod },
+  { "=",            PrimitiveProc_equal },
 
-  { "null?",       PrimitiveProc_nullp },
-  { "primitive?",  PrimitiveProc_primitivep },
-  { "pair?",       PrimitiveProc_pairp },
-  { "symbol?",     PrimitiveProc_symbolp },
-  { "string?",     PrimitiveProc_stringp },
-  { "number?",     PrimitiveProc_numberp },
-  { "fexpr?",      PrimitiveProc_fexprp },
+  { "null?",        PrimitiveProc_nullp },
+  { "primitive?",   PrimitiveProc_primitivep },
+  { "pair?",        PrimitiveProc_pairp },
+  { "symbol?",      PrimitiveProc_symbolp },
+  { "string?",      PrimitiveProc_stringp },
+  { "number?",      PrimitiveProc_numberp },
+  { "fexpr?",       PrimitiveProc_fexprp },
 
-  { "ε",           PrimitiveProc_epsilon },
+  { "ε",            PrimitiveProc_epsilon },
 
-  { "environment", PrimitiveProc_environment },
-  { "eval",        PrimitiveProc_eval },
-  { "apply",       PrimitiveProc_apply }
+  { "environment",  PrimitiveProc_environment },
+  { "eval",         PrimitiveProc_eval },
+  { "apply",        PrimitiveProc_apply },
+
+  { "%open-fexpr%", PrimitiveProc_open_fexpr }
 };
 
 Expression *
