@@ -159,7 +159,7 @@ PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
 
 /* --- */
 
-Expression *
+static Expression *
 PrimitiveProc_cons (Expression *args, Environment **env, Eval *ev)
 {
   Expression *fst = NULL, *snd = NULL;
@@ -174,7 +174,7 @@ PrimitiveProc_cons (Expression *args, Environment **env, Eval *ev)
   return Expression_cons(fst, snd);
 }
 
-Expression *
+static Expression *
 PrimitiveProc_car (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
@@ -187,7 +187,7 @@ PrimitiveProc_car (Expression *args, Environment **env, Eval *ev)
   return Expression_car(expr);
 }
 
-Expression *
+static Expression *
 PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
@@ -200,13 +200,13 @@ PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
   return Expression_cdr(expr);
 }
 
-Expression *
+static Expression *
 PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
 {
   return Eval_mapEval(ev, args, env);
 }
 
-Expression *
+static Expression *
 PrimitiveProc_length (Expression *args, Environment **env, Eval *ev)
 {
   Expression *list = NULL;
@@ -269,37 +269,37 @@ PrimitiveHelper_arith1 (char *name, Number *(*op)(Number *, Number*),
                                Expression_expr(expr));
 }
 
-Expression *
+static Expression *
 PrimitiveProc_add (Expression *args, Environment **env, Eval *ev)
 {
   return PrimitiveHelper_arith("+", Number_add, args, env, ev, Number_new(0));
 }
 
-Expression *
+static Expression *
 PrimitiveProc_sub (Expression *args, Environment **env, Eval *ev)
 {
   return PrimitiveHelper_arith("-", Number_sub, args, env, ev, Number_new(0));
 }
 
-Expression *
+static Expression *
 PrimitiveProc_mul (Expression *args, Environment **env, Eval *ev)
 {
   return PrimitiveHelper_arith("*", Number_mul, args, env, ev, Number_new(1));
 }
 
-Expression *
+static Expression *
 PrimitiveProc_div (Expression *args, Environment **env, Eval *ev)
 {
   return PrimitiveHelper_arith1("/", Number_div, args, env, ev);
 }
 
-Expression *
+static Expression *
 PrimitiveProc_idiv (Expression *args, Environment **env, Eval *ev)
 {
   return PrimitiveHelper_arith1("div", Number_idiv, args, env, ev);
 }
 
-Expression *
+static Expression *
 PrimitiveProc_mod (Expression *args, Environment **env, Eval *ev)
 {
   return PrimitiveHelper_arith1("mod", Number_mod, args, env, ev);
@@ -315,7 +315,7 @@ PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
   return *env;
 }
 
-Expression *
+static Expression *
 PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 {
   Environment *environment = NULL;
