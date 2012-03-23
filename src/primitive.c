@@ -369,7 +369,7 @@ PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *expr = NULL; 
+  Expression *expr = NULL;
   Environment *environment = NULL;
 
   nb_args("eval", 2, args);
@@ -382,6 +382,21 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
   return Eval_eval(ev, expr, &environment);
 }
 
+static Expression *
+PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("apply", 2, args);
+
+  if ((expr = Eval_eval(ev, cadr(args), env)) == NULL)
+    return NULL;
+
+  Expression_setCdr(args, expr);
+
+  return Eval_eval(ev, args, env);
+}
+
 #undef car
 #undef cdr
 #undef cadr
@@ -391,7 +406,7 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 23
+#define PRIMITIVE_COUNT 25
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",      PrimitiveProc_define },
@@ -413,16 +428,18 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "if",          PrimitiveProc_if },
 
   { "null?",       PrimitiveProc_nullp },
+  { "primitive?",  PrimitiveProc_primitivep },
   { "pair?",       PrimitiveProc_pairp },
   { "symbol?",     PrimitiveProc_symbolp },
   { "string?",     PrimitiveProc_stringp },
   { "number?",     PrimitiveProc_numberp },
-  { "primitive?",  PrimitiveProc_primitivep },
+  { "fexpr?",      PrimitiveProc_fexprp },
 
   { "ε",           PrimitiveProc_epsilon },
 
   { "environment", PrimitiveProc_environment },
-  { "eval",        PrimitiveProc_eval }
+  { "eval",        PrimitiveProc_eval },
+  { "apply",       PrimitiveProc_apply }
 };
 
 Expression *

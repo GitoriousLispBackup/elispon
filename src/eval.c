@@ -40,7 +40,6 @@ static Expression *
 Eval_evalPair (Eval *self, Pair *pair, Environment **env)
 {
   Expression *f = NULL;
-  Environment *e = NULL;
 
   if ((f = Eval_eval(self, Pair_fst(pair), env)) == NULL)
     return NULL;
@@ -52,11 +51,20 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
   if (Expression_type(f) == PRIMITIVE)
     return Primitive_proc(Expression_expr(f))(Pair_snd(pair), env, self);
 
-  e = Fexpr_lexenv(Expression_expr(f));
-  e = Environment_add(e, Fexpr_arg(Expression_expr(f)), Pair_snd(pair));
-  e = Environment_add(e, Fexpr_dynenv(Expression_expr(f)), *env);
+  if (Expression_type(f) == FEXPR) {
+    Environment *e = NULL;
+    Symbol *fexpr = NULL;
 
-  return Eval_eval(self, Fexpr_body(Expression_expr(f)), &e);
+    e = Fexpr_lexenv(Expression_expr(f));
+    e = Environment_add(e, Fexpr_arg(Expression_expr(f)), Pair_snd(pair));
+    e = Environment_add(e, Fexpr_dynenv(Expression_expr(f)), *env);
+    if ((fexpr = Environment_revFind(*env, f)))
+      e = Environment_add(e, fexpr, f);
+
+    return Eval_eval(self, Fexpr_body(Expression_expr(f)), &e);
+  }
+
+  return NULL;
 }
 
 static Expression *
