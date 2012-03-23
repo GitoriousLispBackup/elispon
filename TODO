@@ -1,18 +1,20 @@
 Lexer should return a struct like this:
-struct Token {
-  TokenType type;
-  union {
-    char *str;
-    double num;
-  } token;
-  struct {
-    int line, col
-  } beg, end;
-  char *source;
-}
+
+    struct Token {
+      TokenType type;
+      union {
+        char *str;
+        double num;
+      } token;
+      struct {
+        int line, col
+      } beg, end;
+      char *source;
+    }
+
 and most of this information should be keeped at least until expansion time is
-over, maybe during runtime too to report fexpr error if the project goes this
-way
+   over, maybe during runtime too to report fexpr error if the project goes
+   this way
 
 ---
 
