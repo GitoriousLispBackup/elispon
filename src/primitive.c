@@ -27,11 +27,18 @@ Primitive_proc (Primitive *self)
 
 /* ----- */
 
-#define nb_args(proc,n,args)                    \
-  if (Expression_length(args) != n) {           \
-    Utils_error("%s: expected %d argument%s",   \
-                proc, n, ((n==1)?"":"s"));      \
-    return NULL;                                \
+#define nb_args(proc,n,args)                                        \
+  if (Expression_length(args) != n) {                               \
+    Utils_error("%s: expected %d argument%s, given %d",             \
+                proc, n, ((n==1)?"":"s"), Expression_length(args)); \
+    return NULL;                                                    \
+  }
+
+#define min_nb_args(proc,n,args)                                        \
+  if (Expression_length(args) < n) {                                    \
+    Utils_error("%s: expected at least %d argument%s, given %d",        \
+                proc, n, ((n==1)?"":"s"), Expression_length(args));     \
+    return NULL;                                                        \
   }
 
 #define car(e)  (Expression_car(e))
@@ -58,11 +65,12 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
   return car(args);
 }
 
+/* --- */
+
 Expression *
 PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-  Expression *expr = NULL;
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
 
   nb_args("null?", 1, args);
 
@@ -77,8 +85,7 @@ PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
 Expression *
 PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-  Expression *expr = NULL;
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
 
   nb_args("pair?", 1, args);
 
@@ -93,8 +100,7 @@ PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
 Expression *
 PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-  Expression *expr = NULL;
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
 
   nb_args("symbol?", 1, args);
 
@@ -109,8 +115,7 @@ PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
 Expression *
 PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-  Expression *expr = NULL;
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
 
   nb_args("number?", 1, args);
 
@@ -125,8 +130,7 @@ PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
 Expression *
 PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-  Expression *expr = NULL;
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
 
   nb_args("string?", 1, args);
 
@@ -141,8 +145,7 @@ PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
 Expression *
 PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-  Expression *expr = NULL;
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
 
   nb_args("primitive?", 1, args);
 
@@ -153,6 +156,8 @@ PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
     return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
   return Expression_new(PAIR, NULL);
 }
+
+/* --- */
 
 Expression *
 PrimitiveProc_cons (Expression *args, Environment **env, Eval *ev)
@@ -214,6 +219,94 @@ PrimitiveProc_length (Expression *args, Environment **env, Eval *ev)
   return Expression_new(NUMBER, Number_new(Expression_length(list)));
 }
 
+/* --- */
+
+static Expression *
+PrimitiveHelper_arith (char *name, Number *(*op)(Number *, Number*),
+                       Expression *args, Environment **env, Eval *ev,
+                       Number *neutral)
+{
+  Expression *list = args, *tmp = NULL;
+  Number *result = neutral;
+
+  while (!Expression_isNil(list)) {
+    if (Expression_type(list) != PAIR) {
+      Utils_error("%s: expected proper argument list", name);
+      return NULL;
+    }
+    if ((tmp = Eval_eval(ev, car(list), env)) == NULL)
+      return NULL;
+    if (Expression_type(tmp) != NUMBER) {
+      Utils_error("%s: expected number", name);
+      return NULL;
+    }
+    result = op(result, Expression_expr(tmp));
+    list = cdr(list);
+  }
+
+  return Expression_new(NUMBER, result);
+}
+
+static Expression *
+PrimitiveHelper_arith1 (char *name, Number *(*op)(Number *, Number*),
+                        Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  min_nb_args(name, 1, args);
+
+  if (Expression_length(args) == 1)
+    return PrimitiveHelper_arith(name, op, args, env, ev, Number_new(1));
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+  if (Expression_type(expr) != NUMBER) {
+    Utils_error("%s: expected number", name);
+    return NULL;
+  }
+
+  return PrimitiveHelper_arith(name, op, cdr(args), env, ev,
+                               Expression_expr(expr));
+}
+
+Expression *
+PrimitiveProc_add (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_arith("+", Number_add, args, env, ev, Number_new(0));
+}
+
+Expression *
+PrimitiveProc_sub (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_arith("-", Number_sub, args, env, ev, Number_new(0));
+}
+
+Expression *
+PrimitiveProc_mul (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_arith("*", Number_mul, args, env, ev, Number_new(1));
+}
+
+Expression *
+PrimitiveProc_div (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_arith1("/", Number_div, args, env, ev);
+}
+
+Expression *
+PrimitiveProc_idiv (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_arith1("div", Number_idiv, args, env, ev);
+}
+
+Expression *
+PrimitiveProc_mod (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_arith1("mod", Number_mod, args, env, ev);
+}
+
+/* --- */
+
 Expression *
 PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 {
@@ -244,21 +337,31 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 14
+#define PRIMITIVE_COUNT 20
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",      PrimitiveProc_define },
+
   { "null?",       PrimitiveProc_nullp },
   { "pair?",       PrimitiveProc_pairp },
   { "symbol?",     PrimitiveProc_symbolp },
   { "number?",     PrimitiveProc_numberp },
   { "string?",     PrimitiveProc_stringp },
   { "primitive?",  PrimitiveProc_primitivep },
+
   { "cons",        PrimitiveProc_cons },
   { "car",         PrimitiveProc_car },
   { "cdr",         PrimitiveProc_cdr },
   { "list",        PrimitiveProc_list },
   { "length",      PrimitiveProc_length },
+
+  { "+",           PrimitiveProc_add },
+  { "-",           PrimitiveProc_sub },
+  { "*",           PrimitiveProc_mul },
+  { "/",           PrimitiveProc_div },
+  { "div",         PrimitiveProc_idiv },
+  { "mod",         PrimitiveProc_mod },
+
   { "environment", PrimitiveProc_environment },
   { "eval",        PrimitiveProc_eval }
 };
