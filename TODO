@@ -30,3 +30,11 @@ Fix the problem with Environment_delete which fail when trying to delete the
    there)
 
 => go for a mark-and-sweep GC ?
+=> use libgc ?
+
+---
+
+libunistring ?
+libffi ?
+libreadline ?
+libgmp ?
