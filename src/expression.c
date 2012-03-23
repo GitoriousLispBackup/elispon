@@ -76,13 +76,46 @@ Expression_type (Expression *self)
   return self->type;
 }
 
+void
+Expression_setType (Expression *self, ExprType type)
+{
+  self->type = type;
+}
+
 void *
 Expression_expr (Expression *self)
 {
   return self->expr;
 }
 
+void
+Expression_setExpr (Expression *self, void *expr)
+{
+  self->expr = expr;
+}
+
 /* ----- */
+
+char *
+Expression_typeName (Expression *self)
+{
+  switch (self->type) {
+  case PRIMITIVE:
+    return "primitive";
+  case PAIR:
+    return "pair";
+  case SYMBOL:
+    return "symbol";
+  case STRING:
+    return "string";
+  case NUMBER:
+    return "number";
+  case FEXPR:
+    return "fexpr";
+  default:
+    return "unknown";
+  }
+}
 
 bool
 Expression_isNil (Expression *self)

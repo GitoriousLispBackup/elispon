@@ -44,7 +44,8 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
   if ((f = Eval_eval(self, Pair_fst(pair), env)) == NULL)
     return NULL;
   if (!Expression_isCallable(f)) {
-    Utils_error("expected primitive procedure or fexpr");
+    Utils_error("expected primitive procedure or fexpr, given a %s",
+                Expression_typeName(f));
     return NULL;
   }
 
@@ -58,7 +59,7 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
     e = Fexpr_lexenv(Expression_expr(f));
     e = Environment_add(e, Fexpr_arg(Expression_expr(f)), Pair_snd(pair));
     e = Environment_add(e, Fexpr_dynenv(Expression_expr(f)), *env);
-    if ((fexpr = Environment_revFind(*env, f)))
+    if ((fexpr = Environment_revFind(*env, f)) != NULL)
       e = Environment_add(e, fexpr, f);
 
     return Eval_eval(self, Fexpr_body(Expression_expr(f)), &e);

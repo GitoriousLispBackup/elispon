@@ -13,8 +13,11 @@ Expression *Expression_new (ExprType type, void *expr);
 void Expression_delete (Expression *self);
 
 ExprType Expression_type (Expression *self);
+void Expression_setType (Expression *self, ExprType type);
 void *Expression_expr (Expression *self);
+void Expression_setExpr (Expression *self, void *expr);
 
+char *Expression_typeName (Expression *self);
 bool Expression_isNil (Expression *self);
 bool Expression_isCallable (Expression *self);
 Expression *Expression_cons (Expression *car, Expression *cdr);
