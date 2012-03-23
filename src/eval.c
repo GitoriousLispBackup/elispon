@@ -111,8 +111,10 @@ Eval_eval (Eval *self, Expression *expr, Environment **env)
 Expression *
 Eval_mapEval (Eval *self, Expression *expr, Environment **env)
 {
-  Expression *car = NULL, *list = expr;
+  Expression *car = NULL, *list = NULL, *tmp = NULL;
 
+  list = expr;
+  tmp = Expression_new(PAIR, NULL);
   while (!Expression_isNil(list)) {
     if (Expression_type(list) != PAIR) {
       Utils_error("expected pair");
@@ -121,9 +123,18 @@ Eval_mapEval (Eval *self, Expression *expr, Environment **env)
     if ((car = Eval_eval(self, Expression_car(list), env)) == NULL)
       return NULL;
 
-    Expression_setCar(list, car);
+    tmp = Expression_cons(car, tmp);
     list = Expression_cdr(list);
   }
 
-  return expr;
+  list = tmp;
+  car = Expression_new(PAIR, NULL);
+  while (!Expression_isNil(list)) {
+    tmp = Expression_cdr(list);
+    Expression_setCdr(list, car);
+    car = list;
+    list = tmp;
+  }
+
+  return car;
 }
