@@ -73,3 +73,9 @@ Number_mod (Number *self, Number *num)
 }
 
 #undef round
+
+Number *
+Number_eq (Number *self, Number *num)
+{
+  return Number_new(self->val == num->val);
+}

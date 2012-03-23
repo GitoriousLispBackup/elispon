@@ -46,7 +46,7 @@ Primitive_proc (Primitive *self)
 #define cadr(e) (Expression_car(Expression_cdr(e)))
 #define cddr(e) (Expression_cdr(Expression_cdr(e)))
 
-Expression *
+static Expression *
 PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
@@ -63,98 +63,6 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
   *env = Environment_add(*env, Expression_expr(car(args)), expr);
 
   return car(args);
-}
-
-/* --- */
-
-Expression *
-PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("null?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_isNil(expr))
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
-}
-
-Expression *
-PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("pair?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == PAIR && !Expression_isNil(expr))
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
-}
-
-Expression *
-PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("symbol?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == SYMBOL)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
-}
-
-Expression *
-PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("number?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == NUMBER)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
-}
-
-Expression *
-PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("string?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == STRING)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
-}
-
-Expression *
-PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
-
-  nb_args("primitive?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == PRIMITIVE)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
-  return Expression_new(PAIR, NULL);
 }
 
 /* --- */
@@ -305,6 +213,19 @@ PrimitiveProc_mod (Expression *args, Environment **env, Eval *ev)
   return PrimitiveHelper_arith1("mod", Number_mod, args, env, ev);
 }
 
+static Expression *
+PrimitiveProc_equal (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+
+  if ((expr = PrimitiveHelper_arith1("=", Number_eq, args, env, ev)) == NULL)
+    return NULL;
+
+  if (Number_val(Expression_expr(expr)))
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
 /* --- */
 
 static Expression *
@@ -320,6 +241,98 @@ PrimitiveProc_if (Expression *args, Environment **env, Eval *ev)
   if (!Expression_isNil(cond))
     return Eval_eval(ev, cadr(args), env);
   return Eval_eval(ev, cadr(cdr(args)), env);
+}
+
+/* --- */
+
+static Expression *
+PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+
+  nb_args("null?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_isNil(expr))
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+static Expression *
+PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+
+  nb_args("pair?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == PAIR && !Expression_isNil(expr))
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+static Expression *
+PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+
+  nb_args("symbol?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == SYMBOL)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+static Expression *
+PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+
+  nb_args("number?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == NUMBER)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+static Expression *
+PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+
+  nb_args("string?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == STRING)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+static Expression *
+PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+
+  nb_args("primitive?", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == PRIMITIVE)
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
 }
 
 /* --- */
@@ -354,17 +367,10 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 21
+#define PRIMITIVE_COUNT 24
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",      PrimitiveProc_define },
-
-  { "null?",       PrimitiveProc_nullp },
-  { "pair?",       PrimitiveProc_pairp },
-  { "symbol?",     PrimitiveProc_symbolp },
-  { "number?",     PrimitiveProc_numberp },
-  { "string?",     PrimitiveProc_stringp },
-  { "primitive?",  PrimitiveProc_primitivep },
 
   { "cons",        PrimitiveProc_cons },
   { "car",         PrimitiveProc_car },
@@ -378,8 +384,16 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "/",           PrimitiveProc_div },
   { "div",         PrimitiveProc_idiv },
   { "mod",         PrimitiveProc_mod },
+  { "=",           PrimitiveProc_equal },
 
   { "if",          PrimitiveProc_if },
+
+  { "null?",       PrimitiveProc_nullp },
+  { "pair?",       PrimitiveProc_pairp },
+  { "symbol?",     PrimitiveProc_symbolp },
+  { "number?",     PrimitiveProc_numberp },
+  { "string?",     PrimitiveProc_stringp },
+  { "primitive?",  PrimitiveProc_primitivep },
 
   { "environment", PrimitiveProc_environment },
   { "eval",        PrimitiveProc_eval }
