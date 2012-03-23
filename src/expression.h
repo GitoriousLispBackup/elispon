@@ -24,5 +24,6 @@ Expression *Expression_car (Expression *self);
 Expression *Expression_cdr (Expression *self);
 void Expression_setCar (Expression *self, Expression *expr);
 void Expression_setCdr (Expression *self, Expression *expr);
+int Expression_length (Expression *self);
 
 #endif /* EXPRESSION_H__ */

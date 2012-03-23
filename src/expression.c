@@ -144,3 +144,19 @@ Expression_setCdr (Expression *self, Expression *expr)
     Utils_fatal("Expression_setCdr: argument is not a pair");
   Pair_setSnd(Expression_expr(self), expr);
 }
+
+int
+Expression_length (Expression *self)
+{
+  int l = 0;
+
+  if (Expression_type(self) != PAIR)
+    return 0;
+
+  while (Expression_type(self) == PAIR && self->expr != NULL) {
+    l++;
+    self = Expression_cdr(self);
+  }
+
+  return l;
+}

@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "expression.h"
 #include "symbol.h"
+#include "number.h"
 #include "environment.h"
 #include "eval.h"
 #include "primitive.h"
@@ -26,6 +27,13 @@ Primitive_proc (Primitive *self)
 
 /* ----- */
 
+#define nb_args(proc,n,args)                    \
+  if (Expression_length(args) != n) {           \
+    Utils_error("%s: expected %d argument%s",   \
+                proc, n, ((n==1)?"":"s"));      \
+    return NULL;                                \
+  }
+
 #define car(e)  (Expression_car(e))
 #define cdr(e)  (Expression_cdr(e))
 #define cadr(e) (Expression_car(Expression_cdr(e)))
@@ -36,12 +44,7 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
 
-  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
-      Expression_type(cdr(args)) != PAIR || Expression_isNil(cdr(args)) ||
-      !Expression_isNil(cddr(args))) {
-    Utils_error("define: expected two arguments");
-    return NULL;
-  }
+  nb_args("define", 2, args);
   if (Expression_type(car(args)) != SYMBOL) {
     Utils_error("define: expected symbol as first argument");
     return NULL;
@@ -60,12 +63,7 @@ PrimitiveProc_cons (Expression *args, Environment **env, Eval *ev)
 {
   Expression *fst = NULL, *snd = NULL;
 
-  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
-      Expression_type(cdr(args)) != PAIR || Expression_isNil(cdr(args)) ||
-      !Expression_isNil(cddr(args))) {
-    Utils_error("cons: expected two arguments");
-    return NULL;
-  }
+  nb_args("cons", 2, args);
 
   if ((fst = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
@@ -80,11 +78,7 @@ PrimitiveProc_car (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
 
-  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
-      !Expression_isNil(cdr(args))) {
-    Utils_error("car: expected one pair argument");
-    return NULL;
-  }
+  nb_args("car", 1, args);
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
@@ -97,11 +91,7 @@ PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
 
-  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
-      !Expression_isNil(cdr(args))) {
-    Utils_error("cdr: expected one pair argument");
-    return NULL;
-  }
+  nb_args("cdr", 1, args);
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
@@ -116,8 +106,23 @@ PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
 }
 
 Expression *
+PrimitiveProc_length (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *list = NULL;
+
+  nb_args("length", 1, args);
+
+  if ((list = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  return Expression_new(NUMBER, Number_new(Expression_length(list)));
+}
+
+Expression *
 PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 {
+  nb_args("environment", 0, args);
+
   return *env;
 }
 
@@ -126,12 +131,7 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 {
   Environment *environment = NULL;
 
-  if (Expression_isNil(args) || Expression_type(args) != PAIR ||
-      Expression_type(cdr(args)) != PAIR || Expression_isNil(cdr(args)) ||
-      !Expression_isNil(cddr(args))) {
-    Utils_error("eval: expected two arguments");
-    return NULL;
-  }
+  nb_args("eval", 2, args);
 
   if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
     return NULL;
@@ -144,9 +144,11 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 #undef caar
 #undef cadr
 
+#undef nb_args
+
 /* ----- */
 
-#define PRIMITIVE_COUNT 7
+#define PRIMITIVE_COUNT 8
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",      PrimitiveProc_define },
@@ -154,6 +156,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "car",         PrimitiveProc_car },
   { "cdr",         PrimitiveProc_cdr },
   { "list",        PrimitiveProc_list },
+  { "length",      PrimitiveProc_length },
   { "environment", PrimitiveProc_environment },
   { "eval",        PrimitiveProc_eval }
 };
