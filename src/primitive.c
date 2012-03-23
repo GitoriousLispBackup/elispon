@@ -307,7 +307,24 @@ PrimitiveProc_mod (Expression *args, Environment **env, Eval *ev)
 
 /* --- */
 
-Expression *
+static Expression *
+PrimitiveProc_if (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *cond = NULL;
+
+  nb_args("if", 3, args);
+
+  if ((cond = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (!Expression_isNil(cond))
+    return Eval_eval(ev, cadr(args), env);
+  return Eval_eval(ev, cadr(cdr(args)), env);
+}
+
+/* --- */
+
+static Expression *
 PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 {
   nb_args("environment", 0, args);
@@ -337,7 +354,7 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 20
+#define PRIMITIVE_COUNT 21
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",      PrimitiveProc_define },
@@ -361,6 +378,8 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "/",           PrimitiveProc_div },
   { "div",         PrimitiveProc_idiv },
   { "mod",         PrimitiveProc_mod },
+
+  { "if",          PrimitiveProc_if },
 
   { "environment", PrimitiveProc_environment },
   { "eval",        PrimitiveProc_eval }
