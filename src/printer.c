@@ -65,20 +65,19 @@ Printer_printPair (Printer *self, Pair *pair)
     fprintf(self->output, " . ");
     Printer_printExpression(self, Pair_snd(pair));
   }
+  Pair_setFlag(pair, false);
 }
 
 static void
 Printer_printSymbol (Printer *self, Symbol *sym)
 {
-  fprintf(self->output, Symbol_name(sym));
+  fprintf(self->output, "%s", Symbol_name(sym));
 }
 
 static void
 Printer_printString (Printer *self, String *str)
 {
-  fprintf(self->output, "\"");
-  fprintf(self->output, String_buf(str));
-  fprintf(self->output, "\"");
+  fprintf(self->output, "\"%s\"", String_buf(str));
 }
 
 static void
