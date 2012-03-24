@@ -43,6 +43,13 @@ Primitive_proc (Primitive *self)
     return NULL;                                                        \
   }
 
+#define minmax_nb_args(proc,min,max,args,n)                             \
+  if ((*n = Expression_length(args)) < min || *n > max) {               \
+    Utils_error("%s: expected between %d and %d arguments, given %d",   \
+                proc, min, max, *n);                                    \
+    return NULL;                                                        \
+  }
+
 #define car(e)  (Expression_car(e))
 #define cdr(e)  (Expression_cdr(e))
 #define cadr(e) (Expression_car(Expression_cdr(e)))
@@ -413,15 +420,20 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
   Environment *environment = NULL;
+  int nb_args;
 
-  nb_args("eval", 2, args);
+  minmax_nb_args("eval", 1, 2, args, &nb_args);
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
-  if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
-    return NULL;
 
-  return Eval_eval(ev, expr, &environment);
+  if (nb_args == 2) {
+    if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
+      return NULL;
+    return Eval_eval(ev, expr, &environment);
+  }
+
+  return Eval_eval(ev, expr, env);
 }
 
 static Expression *
