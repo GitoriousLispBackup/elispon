@@ -46,6 +46,13 @@ Printer_printPrimitive (Printer *self, Primitive *prim)
 static void
 Printer_printPair (Printer *self, Pair *pair)
 {
+  if (Pair_flag(pair)) {
+    Pair_setFlag(pair, false);
+    fprintf(self->output, "...");
+    return;
+  }
+
+  Pair_setFlag(pair, true);
   Printer_printExpression(self, Pair_fst(pair));
 
   if (Expression_type(Pair_snd(pair)) == PAIR) {

@@ -172,14 +172,28 @@ Expression_setCdr (Expression *self, Expression *expr)
 int
 Expression_length (Expression *self)
 {
+  Expression *list = NULL;
   int l = 0;
 
   if (Expression_type(self) != PAIR)
     return 0;
 
-  while (Expression_type(self) == PAIR && self->expr != NULL) {
+  list = self;
+  while (Expression_type(list) == PAIR && list->expr != NULL) {
+    if (Pair_flag(list->expr)) {
+      l = -1;
+      break;
+    }
     l++;
-    self = Expression_cdr(self);
+    Pair_setFlag(list->expr, true);
+    list = Expression_cdr(list);
+  }
+
+  list = self;
+  while (Expression_type(list) == PAIR && list->expr != NULL) {
+    if (!Pair_flag(list->expr)) break;
+    Pair_setFlag(list->expr, false);
+    list = Expression_cdr(list);
   }
 
   return l;

@@ -1,8 +1,10 @@
+#include <stdbool.h>
 #include "utils.h"
 #include "pair.h"
 
 struct Pair {
   Expression *fst, *snd;
+  bool flag;
 };
 
 Pair *
@@ -14,6 +16,7 @@ Pair_new (Expression *fst, Expression *snd)
 
   self->fst = fst;
   self->snd = snd;
+  self->flag = false;
 
   return self;
 }
@@ -51,4 +54,16 @@ void
 Pair_setSnd (Pair *self, Expression *expr)
 {
   self->snd = expr;
+}
+
+bool
+Pair_flag (Pair *self)
+{
+  return self->flag;
+}
+
+void
+Pair_setFlag (Pair *self, bool flag)
+{
+  self->flag = flag;
 }
