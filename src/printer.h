@@ -1,9 +1,12 @@
 #ifndef PRINTER_H__
 #define PRINTER_H__
 
+#include "port.h"
+#include "expression.h"
+
 typedef struct Printer Printer;
 
-Printer *Printer_new (const char *output);
+Printer *Printer_new (Port *output);
 void Printer_delete (Printer *self);
 
 void Printer_printExpression (Printer *self, Expression *expr);

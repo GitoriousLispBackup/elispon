@@ -23,7 +23,7 @@ struct REPL {
 };
 
 REPL *
-REPL_new (Parser *parser, Eval *eval, Environment *env)
+REPL_new (Parser *parser, Eval *eval, Environment *env, Printer *printer)
 {
   REPL *self = NULL;
 
@@ -34,7 +34,7 @@ REPL_new (Parser *parser, Eval *eval, Environment *env)
   self->parser = parser;
   self->eval = eval;
   self->env = env;
-  self->printer = Printer_new("/dev/stdout");
+  self->printer = printer;
   self->expr = NULL;
 
   printf("Welcome to (εlispon) v0.\n");
@@ -46,7 +46,6 @@ void
 REPL_delete (REPL *self)
 {
   if (self == NULL) return;
-  Printer_delete(self->printer);
   free_(self);
 
   printf("\nBye.\n");

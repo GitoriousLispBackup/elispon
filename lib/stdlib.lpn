@@ -99,3 +99,23 @@
 (define cdadr (λ x (cdr (cadr x))))
 (define cddar (λ x (cdr (cdar x))))
 (define cdddr (λ x (cdr (cddr x))))
+
+(define lazy-cons
+  (ε args e
+     (if (not (= (length args) 2))
+         "Error: lazy-cons: expected 2 arguments"
+         (cons e args))))
+
+(define lazy-car
+  (ε args e
+     (if (not (= (length args) 1))
+         "Error: lazy-car: expected 1 argument"
+         (let (c . (eval (car args) e))
+           (eval (cadr c) (car c))))))
+
+(define lazy-cdr
+  (ε args e
+     (if (not (= (length args) 1))
+         "Error: lazy-car: expected 1 argument"
+         (let (c . (eval (car args) e))
+           (eval (caddr c) (car c))))))

@@ -4,10 +4,11 @@
 #include "parser.h"
 #include "eval.h"
 #include "environment.h"
+#include "printer.h"
 
 typedef struct REPL REPL;
 
-REPL *REPL_new (Parser *parser, Eval *eval, Environment *env);
+REPL *REPL_new (Parser *parser, Eval *eval, Environment *env, Printer *printer);
 void REPL_delete (REPL *self);
 
 REPL *REPL_read (REPL *self);

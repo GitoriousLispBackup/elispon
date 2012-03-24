@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "port.h"
 #include "parser.h"
+#include "printer.h"
 #include "expression.h"
 #include "primitive.h"
 #include "eval.h"
@@ -17,6 +18,7 @@ main (int argc, char *argv[])
   Expression *expr = NULL;
   Environment *env = Environment_new(Primitive_initialEnvironment());
   Eval *eval = Eval_new(env);
+  Printer *printer = NULL;
   REPL *repl = NULL;
 
   if (argc == 2) {
@@ -29,9 +31,13 @@ main (int argc, char *argv[])
     Utils_closeFile(stdlib);
   }
 
-  repl = REPL_new(parser, eval, env);
+  port = Port_newFile(stdout, "stdout");
+  printer = Printer_new(port);
+  repl = REPL_new(parser, eval, env, printer);
   while (REPL_print(REPL_eval(REPL_read(repl))));
   REPL_delete(repl);
+  Printer_delete(printer);
+  Port_delete(port);
 
   return 0;
 }

@@ -25,11 +25,6 @@ and most of this information should be keeped at least until expansion time is
 
 ---
 
-Printer should use Port
-(Port must support printf) <-- done
-
----
-
 Check with valgrind where there are memory leak during runtime
 
 ---
