@@ -1,3 +1,10 @@
+Number must have +/-INFINITY flags and take care of cmp to take that into
+   account (this to support infinite list).
+
+Printer should check this flag to print accordingly.
+
+---
+
 Lexer should return a struct like this:
 
     struct Token {
