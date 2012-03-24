@@ -63,6 +63,44 @@ Lexer_reset (Lexer *self, Port *input)
 
 /* ----- */
 
+TokenType
+Lexer_type (Lexer *self)
+{
+  return self->type;
+}
+
+char *
+Lexer_token (Lexer *self)
+{
+  return self->token;
+}
+
+double
+Lexer_number (Lexer *self)
+{
+  return self->number;
+}
+
+int
+Lexer_line (Lexer *self)
+{
+  return self->line;
+}
+
+int
+Lexer_col (Lexer *self)
+{
+  return self->col;
+}
+
+Port *
+Lexer_input (Lexer *self)
+{
+  return self->input;
+}
+
+/* ----- */
+
 static void
 Lexer_error (Lexer *self, char *error)
 {
@@ -243,42 +281,4 @@ void
 Lexer_stepback (Lexer *self)
 {
   self->back = true;
-}
-
-/* ----- */
-
-TokenType
-Lexer_type (Lexer *self)
-{
-  return self->type;
-}
-
-char *
-Lexer_token (Lexer *self)
-{
-  return self->token;
-}
-
-double
-Lexer_number (Lexer *self)
-{
-  return self->number;
-}
-
-int
-Lexer_line (Lexer *self)
-{
-  return self->line;
-}
-
-int
-Lexer_col (Lexer *self)
-{
-  return self->col;
-}
-
-Port *
-Lexer_input (Lexer *self)
-{
-  return self->input;
 }
