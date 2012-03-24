@@ -33,14 +33,5 @@ main (int argc, char *argv[])
   while (REPL_print(REPL_eval(REPL_read(repl))));
   REPL_delete(repl);
 
-  /*/
-  printf("1\n");
-  Parser_delete(parser);
-  printf("2\n");
-  Environment_delete(env);
-  printf("3\n");
-  Eval_delete(eval);
-  /*/
-
   return 0;
 }

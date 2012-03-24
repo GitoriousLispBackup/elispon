@@ -54,13 +54,10 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
 
   if (Expression_type(f) == FEXPR) {
     Environment *e = NULL;
-    Symbol *fexpr = NULL;
 
     e = Fexpr_lexenv(Expression_expr(f));
     e = Environment_add(e, Fexpr_arg(Expression_expr(f)), Pair_snd(pair));
     e = Environment_add(e, Fexpr_dynenv(Expression_expr(f)), *env);
-    if ((fexpr = Environment_revFind(*env, f)) != NULL)
-      e = Environment_add(e, fexpr, f);
 
     return Eval_eval(self, Fexpr_body(Expression_expr(f)), &e);
   }

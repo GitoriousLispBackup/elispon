@@ -37,20 +37,6 @@ Environment_find (Environment *self, Symbol *sym)
   return NULL;
 }
 
-Symbol *
-Environment_revFind (Environment *self, Expression *value)
-{
-  Expression *env = (Expression *) self;
-
-  while (!Expression_isNil(env)) {
-    if (cdar(env) == value)
-      return caar(env);
-    env = Expression_cdr(env);
-  }
-
-  return NULL;
-}
-
 #undef caar
 #undef cdar
 
