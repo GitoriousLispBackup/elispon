@@ -3,16 +3,32 @@
 (define quote
   (ε args _ (car args)))
 
+(define !
+  (ε args e
+     (if (not (= (length args) 1))
+         (error "!: expecped 1 argument")
+         (sequence
+           (define fexpr (eval (car args) e))
+           (if (not (fexpr? fexpr))
+               (error "!: expected fexpr")
+               (ε arguments env
+                  (apply fexpr (eval (cons list arguments) env))))))))
+
+(define &
+  (ε args e
+     (if (not (= (length args) 1))
+         (error "&: expecped 1 argument")
+         (sequence
+           (define app (eval (car args) e))
+           (if (not (fexpr? app))
+               (error "&: expected fexpr")
+               (sequence
+                 (define fexpr (%open-fexpr% app))
+                 (eval (car (cdr (car fexpr))) (cdr fexpr))))))))
+
 (define lambda
   (ε args e
-     (if (not (= (length args) 2))
-         (error "lambda: expected 2 arguments")
-         (if (not (symbol? (car args)))
-             (error "lambda: expected symbol as first argument")
-             (ε arguments env
-                (eval (car (cdr args))
-                      (cons (cons (car args) (eval (car arguments) env))
-                            env)))))))
+     (! (eval (list ε (car args) (quote _) (car (cdr args))) e))))
 (define λ lambda)
 
 (define and
@@ -50,105 +66,128 @@
                               (eq? (car (cdr clause)) (quote =>)))
                          ((eval (car (cdr (cdr clause))) e) c)
                          (eval (car (cdr clause)) e))
-                     (apply cond (cdr args)))))))))
+                     (apply cond (cdr args) e))))))))
+
+(define let
+  (ε args environment
+     (if (not (= (length args) 2))
+         (error "let: expected 2 arguments")
+         (sequence
+           (define pattern (car (car args)))
+           (define expression (eval (cdr (car args)) environment))
+           (define body (car (cdr args)))
+           (define new-env
+             (lambda pat
+               (lambda exp
+                 (lambda env
+                   (sequence
+                     (define p (car pat))
+                     (define x (car exp))
+                     (define e (car env))
+                     (cond
+                      ((null? p)
+                       (if (not (null? x))
+                           (error "let: expression doesn't match pattern")
+                           e))
+                      ((symbol? p)
+                       (cons (cons p x) e))
+                      ((pair? p)
+                       (if (not (pair? x))
+                           (error "let: expression doesn't match pattern")
+                           (((new-env (car p)) (car x))
+                            (((new-env (cdr p)) (cdr x)) e))))
+                      (t (error "let: wrong pattern"))))))))
+           (eval body (((new-env pattern) expression) environment))))))
+
+(define list?
+  (ε args e
+     (let ((l) . args)
+       (or (null? l) (pair? l)))))
+
+(define def
+  (ε args e
+     (apply define
+            (list (car (car args))
+                  (ε arguments env
+                     (let ((cdr (car args)) . arguments)
+                       (car (cdr args)))))
+            e)))
+; TODO fixme (define (foo x) x) -> foo
+; foo -> Error: foo: undefined symbol
+
+;; (define $append
+;;   (ε args e
+;;      (if (not (= (length args) 2))
+;;          (error "append: expected 2 arguments")
+;;          (sequence
+;;            (define lst (car args))
+;;            (define obj (car (cdr args)))
+;;            (if (null? lst)
+;;                (list obj)
+;;                (if (not (pair? lst))
+;;                    (error "append: expected pair as first argument")
+;;                    (cons (car lst)
+;;                          (apply $append (list (cdr lst) obj)))))))))
+;; (define append (! $append))
+
+;; (define caar
+;;   (ε args e
+;;      (if (not (= (length args) 1))
+;;          (error "caar: expected 1 argument")
+;;          (car (car (eval (car args) e))))))
+
+;; (define cadr
+;;   (ε args e
+;;      (if (not (= (length args) 1))
+;;          (error "cadr: expected 1 argument")
+;;          (car (cdr (eval (car args) e))))))
+
+;; (define cdar
+;;   (ε args e
+;;      (if (not (= (length args) 1))
+;;          (error "cdar: expected 1 argument")
+;;          (cdr (car (eval (car args) e))))))
+
+;; (define cddr
+;;   (ε args e
+;;      (if (not (= (length args) 1))
+;;          (error "cddr: expected 1 argument")
+;;          (cdr (cdr (eval (car args) e))))))
 
 ;; (define let
 ;;   (ε args e
 ;;      (if (not (= (length args) 2))
 ;;          (error "let: expected 2 arguments")
-;;          (sequence
-;;            (define pattern (car (car args)))
-;;            (define expr (eval (cdr (car args)) e))
-;; TODO (cond ((symbol? pattern) ...) ...)
 ;;          (eval (cadr args)
 ;;                (cons (cons (caar args)
 ;;                            (eval (cdar args) e))
-;;                      e))))
+;;                      e)))))
 
-(define caar
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "caar: expected 1 argument")
-         (car (car (eval (car args) e))))))
+;; (define caaar (λ x (car (caar x))))
+;; (define caadr (λ x (car (cadr x))))
+;; (define cadar (λ x (car (cdar x))))
+;; (define caddr (λ x (car (cddr x))))
+;; (define cdaar (λ x (cdr (caar x))))
+;; (define cdadr (λ x (cdr (cadr x))))
+;; (define cddar (λ x (cdr (cdar x))))
+;; (define cdddr (λ x (cdr (cddr x))))
 
-(define cadr
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "cadr: expected 1 argument")
-         (car (cdr (eval (car args) e))))))
+;; (define lazy-cons
+;;   (ε args e
+;;      (if (not (= (length args) 2))
+;;          (error "lazy-cons: expected 2 arguments")
+;;          (cons e args))))
 
-(define cdar
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "cdar: expected 1 argument")
-         (cdr (car (eval (car args) e))))))
+;; (define lazy-car
+;;   (ε args e
+;;      (if (not (= (length args) 1))
+;;          (error "lazy-car: expected 1 argument")
+;;          (let (c . (eval (car args) e))
+;;            (eval (cadr c) (car c))))))
 
-(define cddr
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "cddr: expected 1 argument")
-         (cdr (cdr (eval (car args) e))))))
-
-(define let
-  (ε args e
-     (if (not (= (length args) 2))
-         (error "let: expected 2 arguments")
-         (eval (cadr args)
-               (cons (cons (caar args)
-                           (eval (cdar args) e))
-                     e)))))
-
-(define list?
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "list?: expected 1 argument")
-         (or (null? (car args)) (pair? (car args))))))
-
-(define !
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "!: expecped 1 argument")
-         (let (fexpr . (eval (car args) e))
-           (if (not (fexpr? fexpr))
-               (error "!: expected fexpr")
-               (ε arguments env
-                  (apply fexpr (eval (cons list arguments) env))))))))
-
-(define &
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "&: expecped 1 argument")
-         (let (app . (eval (car args) e))
-           (if (not (fexpr? app))
-               (error "&: expected fexpr")
-               (let (fexpr . (%open-fexpr% app))
-                 (eval (cadr (car fexpr)) (cdr fexpr))))))))
-
-(define caaar (λ x (car (caar x))))
-(define caadr (λ x (car (cadr x))))
-(define cadar (λ x (car (cdar x))))
-(define caddr (λ x (car (cddr x))))
-(define cdaar (λ x (cdr (caar x))))
-(define cdadr (λ x (cdr (cadr x))))
-(define cddar (λ x (cdr (cdar x))))
-(define cdddr (λ x (cdr (cddr x))))
-
-(define lazy-cons
-  (ε args e
-     (if (not (= (length args) 2))
-         (error "lazy-cons: expected 2 arguments")
-         (cons e args))))
-
-(define lazy-car
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "lazy-car: expected 1 argument")
-         (let (c . (eval (car args) e))
-           (eval (cadr c) (car c))))))
-
-(define lazy-cdr
-  (ε args e
-     (if (not (= (length args) 1))
-         (error "lazy-car: expected 1 argument")
-         (let (c . (eval (car args) e))
-           (eval (caddr c) (car c))))))
+;; (define lazy-cdr
+;;   (ε args e
+;;      (if (not (= (length args) 1))
+;;          (error "lazy-car: expected 1 argument")
+;;          (let (c . (eval (car args) e))
+;;            (eval (caddr c) (car c))))))
