@@ -113,6 +113,24 @@ PrimitiveProc_if (Expression *args, Environment **env, Eval *ev)
   return Eval_eval(ev, caddr(args), env);
 }
 
+static Expression *
+PrimitiveProc_eq (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr1 = NULL, *expr2;
+
+  nb_args("eq?", 2, args);
+
+  if ((expr1 = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if ((expr2 = Eval_eval(ev, cadr(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_expr(expr1) == Expression_expr(expr2))
+    return Expression_new(SYMBOL, Primitive_true());
+  return Expression_new(PAIR, NULL);
+}
+
 /* --- */
 
 static Expression *
@@ -343,30 +361,24 @@ PrimitiveHelper_arithp (char *name, bool (*pred)(Number *, Number*),
 static Expression *
 PrimitiveProc_equal (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-
   if (PrimitiveHelper_arithp("=", Number_eq, args, env, ev))
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+    return Expression_new(SYMBOL, Primitive_true());
   return Expression_new(PAIR, NULL);
 }
 
 static Expression *
 PrimitiveProc_lesser (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-
   if (PrimitiveHelper_arithp("=", Number_lt, args, env, ev))
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+    return Expression_new(SYMBOL, Primitive_true());
   return Expression_new(PAIR, NULL);
 }
 
 static Expression *
 PrimitiveProc_greater (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols();
-
   if (PrimitiveHelper_arithp("=", Number_gt, args, env, ev))
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+    return Expression_new(SYMBOL, Primitive_true());
   return Expression_new(PAIR, NULL);
 }
 
@@ -375,7 +387,7 @@ PrimitiveProc_greater (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+  Expression *expr = NULL;
 
   nb_args("null?", 1, args);
 
@@ -383,7 +395,7 @@ PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
     return NULL;
 
   if (Expression_isNil(expr))
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+    return Expression_new(SYMBOL, Primitive_true());
   return Expression_new(PAIR, NULL);
 }
 
@@ -391,7 +403,7 @@ static Expression *
 PrimitiveHelper_typep (char *name, ExprType type,
                        Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+  Expression *expr = NULL;
 
   nb_args(name, 1, args);
 
@@ -399,7 +411,7 @@ PrimitiveHelper_typep (char *name, ExprType type,
     return NULL;
 
   if (Expression_type(expr) == type)
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+    return Expression_new(SYMBOL, Primitive_true());
   return Expression_new(PAIR, NULL);
 }
 
@@ -412,7 +424,7 @@ PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+  Expression *expr = NULL;
 
   nb_args("pair?", 1, args);
 
@@ -420,7 +432,7 @@ PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
     return NULL;
 
   if (Expression_type(expr) == PAIR && !Expression_isNil(expr))
-    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+    return Expression_new(SYMBOL, Primitive_true());
   return Expression_new(PAIR, NULL);
 }
 
@@ -541,12 +553,13 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 29
+#define PRIMITIVE_COUNT 30
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
   { "sequence",     PrimitiveProc_sequence },
   { "if",           PrimitiveProc_if },
+  { "eq?",          PrimitiveProc_eq },
 
   { "cons",         PrimitiveProc_cons },
   { "car",          PrimitiveProc_car },
@@ -581,6 +594,17 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "%open-fexpr%", PrimitiveProc_open_fexpr }
 };
 
+Symbol *
+Primitive_true ()
+{
+  static Symbol *t = NULL;
+
+  if (t == NULL)
+    t = Symbol_new("t");
+
+  return t;
+}
+
 Expression *
 Primitive_initialSymbols ()
 {
@@ -592,10 +616,11 @@ Primitive_initialSymbols ()
 
   symbols = Expression_new(PAIR, NULL);
   for (i = 0; i < PRIMITIVE_COUNT; i++) {
-    symbols = Expression_cons(Expression_new(PAIR, Symbol_new(prim_[i].name)),
+    symbols = Expression_cons(Expression_new(SYMBOL,
+                                             Symbol_new(prim_[i].name)),
                               symbols);
   }
-  symbols = Expression_cons(Expression_new(PAIR, Symbol_new("t")),
+  symbols = Expression_cons(Expression_new(SYMBOL, Primitive_true()),
                             symbols);
 
   return symbols;
@@ -618,7 +643,7 @@ Primitive_initialEnvironment ()
     env = Environment_add(env, Utils_findSymbol(symbols, prim_[i].name),
                           Expression_new(PRIMITIVE, &prim_[i]));
   }
-  t = Utils_findSymbol(symbols, "t");
+  t = Primitive_true();
   env = Environment_add(env, t, Expression_new(SYMBOL, t));
 
   return env;
