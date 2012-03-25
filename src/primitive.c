@@ -131,6 +131,27 @@ PrimitiveProc_eq (Expression *args, Environment **env, Eval *ev)
   return Expression_new(PAIR, NULL);
 }
 
+static Expression *
+PrimitiveProc_error (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("error", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != STRING) {
+    Utils_error("error: expected string");
+    return NULL;
+  }
+
+  /* TODO fixme: use printer possibly from ev? */
+  Utils_error("%s", String_buf(Expression_expr(expr)));
+
+  return NULL;
+}
+
 /* --- */
 
 static Expression *
@@ -561,13 +582,14 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 30
+#define PRIMITIVE_COUNT 31
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
   { "sequence",     PrimitiveProc_sequence },
   { "if",           PrimitiveProc_if },
   { "eq?",          PrimitiveProc_eq },
+  { "error",        PrimitiveProc_error },
 
   { "cons",         PrimitiveProc_cons },
   { "car",          PrimitiveProc_car },

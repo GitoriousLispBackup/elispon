@@ -35,7 +35,10 @@ and most of this information should be keeped at least until expansion time is
 
 ---
 
-Check with valgrind where there are memory leak during runtime
+(error "message" symbol)
+
+if error primitive have an additionnal argument, also print location info
+   extracted from symbol
 
 ---
 
