@@ -103,9 +103,10 @@ REPL_read (REPL *self)
 REPL *
 REPL_eval (REPL *self)
 {
-  if (self == NULL || self->expr == NULL) return NULL;
+  if (self == NULL) return NULL;
 
-  self->expr = Eval_eval(self->eval, self->expr, &self->env);
+  if (self->expr != NULL)
+    self->expr = Eval_eval(self->eval, self->expr, &self->env);
 
   return self;
 }
