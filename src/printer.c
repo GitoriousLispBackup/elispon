@@ -40,7 +40,7 @@ Printer_delete (Printer *self)
 static void
 Printer_printPrimitive (Printer *self, Primitive *prim)
 {
-  Port_printf(self->output, "#<primitive:%s>", Primitive_name(prim));
+  Port_printf(self->output, "#{primitive:%s}", Primitive_name(prim));
 }
 
 static void
@@ -114,7 +114,7 @@ Printer_printNumber (Printer *self, Number *num)
 static void
 Printer_printFexpr (Printer *self, Fexpr *fexpr)
 {
-  Port_printf(self->output, "#<fexpr>");
+  Port_printf(self->output, "#{fexpr}");
 }
 
 void
