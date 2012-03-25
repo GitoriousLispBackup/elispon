@@ -549,7 +549,11 @@ PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
   if (nb_args == 3) {
     if ((environment = Eval_eval(ev, caddr(args), env)) == NULL)
       return NULL;
+
     return Eval_eval(ev, Expression_cons(expr, arguments), &environment);
+    /* TODO maybe if environment is modified and it could be revFind in *env
+       before that then *env should be mutated to reflext the changes
+       same in eval */
   }
 
   return Eval_eval(ev, Expression_cons(expr, arguments), env);

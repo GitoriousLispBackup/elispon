@@ -13,6 +13,15 @@ Printer should check this flag to print accordingly.
 lala -> #<struct:foo>
 (type lala) -> foo
 
+or
+
+(define complex (struct r i)) -> complex
+complex -> #<struct:complex>
+(define c (make complex 4 2)) -> c
+c -> #<object:complex>
+(is-a? complex c) -> t
+(complex r c) -> 4
+
 ---
 
 Lexer should return a struct like this:
