@@ -5,6 +5,20 @@ Printer should check this flag to print accordingly.
 
 ---
 
+(define-struct foo (bar baz))
+(define lala (make-foo 1 2))
+(foo-bar lala) -> 1
+(foo-baz lala) -> 2
+(foo? lala) -> t
+lala -> #<struct:foo>
+(type lala) -> foo
+
+(%let ())
+
+defexp
+
+---
+
 Lexer should return a struct like this:
 
     struct Token {
