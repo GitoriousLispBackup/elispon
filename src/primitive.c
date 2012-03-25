@@ -223,12 +223,15 @@ PrimitiveHelper_arith (char *name, Number *(*op)(Number *, Number*),
       Utils_error("%s: expected proper argument list", name);
       return NULL;
     }
+
     if ((tmp = Eval_eval(ev, car(list), env)) == NULL)
       return NULL;
+
     if (Expression_type(tmp) != NUMBER) {
       Utils_error("%s: expected number", name);
       return NULL;
     }
+
     result = op(result, Expression_expr(tmp));
     list = cdr(list);
   }
@@ -249,6 +252,7 @@ PrimitiveHelper_arith1 (char *name, Number *(*op)(Number *, Number*),
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
+
   if (Expression_type(expr) != NUMBER) {
     Utils_error("%s: expected number", name);
     return NULL;
@@ -294,15 +298,74 @@ PrimitiveProc_mod (Expression *args, Environment **env, Eval *ev)
   return PrimitiveHelper_arith1("mod", Number_mod, args, env, ev);
 }
 
+static bool
+PrimitiveHelper_arithp (char *name, bool (*pred)(Number *, Number*),
+                        Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL, *prev = NULL;
+
+  min_nb_args(name, 2, args);
+
+  if ((prev = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(prev) != NUMBER) {
+    Utils_error("%s: expected number", name);
+    return NULL;
+  }
+
+  args = cdr(args);
+
+  while (!Expression_isNil(args)) {
+    if (Expression_type(args) != PAIR) {
+      Utils_error("%s: expected proper argument list", name);
+      return NULL;
+    }
+
+    if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+      return NULL;
+
+    if (Expression_type(expr) != NUMBER) {
+      Utils_error("%s: expected number", name);
+      return NULL;
+    }
+
+    if (!pred(Expression_expr(prev), Expression_expr(expr)))
+      return false;
+
+    prev = expr;
+    args = cdr(args);
+  }
+
+  return true;
+}
+
 static Expression *
 PrimitiveProc_equal (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *symbols = Primitive_initialSymbols(), *expr = NULL;
+  Expression *symbols = Primitive_initialSymbols();
 
-  if ((expr = PrimitiveHelper_arith1("=", Number_eq, args, env, ev)) == NULL)
-    return NULL;
+  if (PrimitiveHelper_arithp("=", Number_eq, args, env, ev))
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
 
-  if (Number_val(Expression_expr(expr)))
+static Expression *
+PrimitiveProc_lesser (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols();
+
+  if (PrimitiveHelper_arithp("=", Number_lt, args, env, ev))
+    return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
+  return Expression_new(PAIR, NULL);
+}
+
+static Expression *
+PrimitiveProc_greater (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *symbols = Primitive_initialSymbols();
+
+  if (PrimitiveHelper_arithp("=", Number_gt, args, env, ev))
     return Expression_new(SYMBOL, Utils_findSymbol(symbols, "t"));
   return Expression_new(PAIR, NULL);
 }
@@ -478,7 +541,7 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 27
+#define PRIMITIVE_COUNT 29
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
@@ -498,6 +561,8 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "div",          PrimitiveProc_idiv },
   { "mod",          PrimitiveProc_mod },
   { "=",            PrimitiveProc_equal },
+  { "<",            PrimitiveProc_lesser },
+  { ">",            PrimitiveProc_greater },
 
   { "null?",        PrimitiveProc_nullp },
   { "primitive?",   PrimitiveProc_primitivep },

@@ -74,8 +74,20 @@ Number_mod (Number *self, Number *num)
 
 #undef round
 
-Number *
+bool
 Number_eq (Number *self, Number *num)
 {
-  return Number_new(self->val == num->val);
+  return self->val == num->val;
+}
+
+bool
+Number_lt (Number *self, Number *num)
+{
+  return self->val < num->val;
+}
+
+bool
+Number_gt (Number *self, Number *num)
+{
+  return self->val > num->val;
 }
