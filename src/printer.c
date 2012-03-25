@@ -44,11 +44,36 @@ Printer_printPrimitive (Printer *self, Primitive *prim)
 }
 
 static void
+Printer_printInfiniteList (Printer *self, Pair *pair, Pair *start)
+{
+  if (pair == start) {
+    if (Pair_flag(pair)) {
+      Pair_setFlag(pair, false);
+      Port_printf(self->output, "…]");
+      return;
+    }
+    else Port_printf(self->output, "[");
+  }
+
+  Pair_setFlag(pair, true);
+  if (Expression_type(Pair_fst(pair)) == PAIR &&
+      Expression_expr(Pair_fst(pair)) == start) {
+    Pair_setFlag(pair, false);
+    Port_printf(self->output, "…]");
+    return;
+  }
+  else Printer_printExpression(self, Pair_fst(pair));
+  Port_printf(self->output, " ");
+  Printer_printInfiniteList(self, Expression_expr(Pair_snd(pair)), start);
+  Pair_setFlag(pair, false);
+}
+
+static void
 Printer_printPair (Printer *self, Pair *pair)
 {
   if (Pair_flag(pair)) {
     Pair_setFlag(pair, false);
-    Port_printf(self->output, "...");
+    Printer_printInfiniteList(self, pair, pair);
     return;
   }
 

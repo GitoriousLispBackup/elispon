@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "utils.h"
 #include "expression.h"
+#include "pair.h"
 #include "symbol.h"
 #include "string.h"
 #include "number.h"
@@ -168,32 +169,30 @@ PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *expr = NULL, *list = NULL, *tmp = NULL;
+  Expression *list = NULL, *expr = NULL, *tmp = NULL, *prev = NULL;
 
-  list = args;
-  tmp = Expression_new(PAIR, NULL);
-  while (!Expression_isNil(list)) {
-    if (Expression_type(list) != PAIR) {
-      Utils_error("list: expected proper list");
-      return NULL;
-    }
-    if ((expr = Eval_eval(ev, Expression_car(list), env)) == NULL)
+  list = tmp = Expression_new(PAIR, Pair_new(NULL, NULL));
+  while (Expression_type(args) == PAIR && !Expression_isNil(args)) {
+    if ((expr = Eval_eval(ev, Expression_car(args), env)) == NULL)
       return NULL;
 
-    tmp = Expression_cons(expr, tmp);
-    list = Expression_cdr(list);
+    Expression_setCar(tmp, expr);
+    Expression_setCdr(tmp, Expression_new(PAIR, Pair_new(NULL, NULL)));
+    prev = tmp;
+    tmp = Expression_cdr(tmp);
+    args = Expression_cdr(args);
   }
 
-  list = tmp;
-  expr = Expression_new(PAIR, NULL);
-  while (!Expression_isNil(list)) {
-    tmp = Expression_cdr(list);
-    Expression_setCdr(list, expr);
-    expr = list;
-    list = tmp;
-  }
+  if (!Expression_isNil(args)) {
+    if ((expr = Eval_eval(ev, args, env)) == NULL)
+      return NULL;
 
-  return expr;
+    Expression_setCdr(prev, expr);
+  }
+  else Expression_setExpr(tmp, NULL);
+
+
+  return list;
 }
 
 static Expression *
