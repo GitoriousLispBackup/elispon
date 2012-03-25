@@ -13,10 +13,6 @@ Printer should check this flag to print accordingly.
 lala -> #<struct:foo>
 (type lala) -> foo
 
-(%let ())
-
-defexp
-
 ---
 
 Lexer should return a struct like this:
