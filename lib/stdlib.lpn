@@ -1,5 +1,69 @@
 (define nil ())
 (define not null?)
+(define quote
+  (ε args _ (car args)))
+
+(define lambda
+  (ε args e
+     (if (not (= (length args) 2))
+         "Error: lambda: expected 2 arguments"
+         (if (not (symbol? (car args)))
+             "Error: lambda: expected symbol as first argument"
+             (ε arguments env
+                (eval (car (cdr args))
+                      (cons (cons (car args) (eval (car arguments) env))
+                            env)))))))
+(define λ lambda)
+
+(define and
+  (ε args e
+     (if (null? args)
+         t
+         (if (= (length args) 1)
+             (eval (car args) e)
+             (if (eval (car args) e)
+                 (apply and (cdr args) e)
+                 nil)))))
+(define or
+  (ε args e
+     (if (null? args)
+         nil
+         (sequence
+           (define arg (eval (car args) e))
+           (if arg
+               arg
+               (apply or (cdr args) e))))))
+
+(define cond
+  (ε args e
+     (if (null? args)
+         nil
+         (sequence
+           (define clause (car args))
+           (define len (length clause))
+           (if (not (or (= len 2) (= len 3)))
+               "Error: cond: malformed clause"
+               (sequence
+                 (define c (eval (car clause) e))
+                 (if c
+                     (if (and (= len 3)
+                              (eq? (car (cdr clause)) (quote =>)))
+                         ((eval (car (cdr (cdr clause))) e) c)
+                         (eval (car (cdr clause)) e))
+                     (apply cond (cdr args)))))))))
+
+;; (define let
+;;   (ε args e
+;;      (if (not (= (length args) 2))
+;;          "Error: let: expected 2 arguments"
+;;          (sequence
+;;            (define pattern (car (car args)))
+;;            (define expr (eval (cdr (car args)) e))
+;; TODO (cond ((symbol? pattern) ...) ...)
+;;          (eval (cadr args)
+;;                (cons (cons (caar args)
+;;                            (eval (cdar args) e))
+;;                      e))))
 
 (define caar
   (ε args e
@@ -25,9 +89,6 @@
          "Error: cddr: expected 1 argument"
          (cdr (cdr (eval (car args) e))))))
 
-(define quote
-  (ε args _ (car args)))
-
 (define let
   (ε args e
      (if (not (= (length args) 2))
@@ -36,22 +97,6 @@
                (cons (cons (caar args)
                            (eval (cdar args) e))
                      e)))))
-
-(define and
-  (ε args e
-     (if (null? args)
-         t
-         (if (= (length args) 1)
-             (eval (car args) e)
-             (if (eval (car args) e)
-                 (apply and (cdr args))
-                 nil)))))
-(define or
-  (ε args e
-     (if (null? args)
-         nil
-         (let (arg . (eval (car args) e))
-           (if arg arg (apply or (cdr args)))))))
 
 (define list?
   (ε args e
@@ -78,18 +123,6 @@
                "Error: &: expected fexpr"
                (let (fexpr . (%open-fexpr% app))
                  (eval (cadr (car fexpr)) (cdr fexpr))))))))
-
-(define lambda
-  (ε args e
-     (if (not (= (length args) 2))
-         "Error: lambda: expected 2 arguments"
-         (if (not (symbol? (car args)))
-             "Error: lambda: expected symbol as first argument"
-             (ε arguments env
-                (eval (cadr args)
-                      (cons (cons (car args) (eval (car arguments) env))
-                            env)))))))
-(define λ lambda)
 
 (define caaar (λ x (car (caar x))))
 (define caadr (λ x (car (cadr x))))
