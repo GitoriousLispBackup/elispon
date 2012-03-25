@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "utils.h"
+#include "port.h"
 #include "expression.h"
 #include "pair.h"
 #include "symbol.h"
@@ -146,8 +147,8 @@ PrimitiveProc_error (Expression *args, Environment **env, Eval *ev)
     return NULL;
   }
 
-  /* TODO fixme: use printer possibly from ev? */
-  Utils_error("%s", String_buf(Expression_expr(expr)));
+  Port_printf(Eval_errput(ev), "Error: %s\n",
+              String_buf(Expression_expr(expr)));
 
   return NULL;
 }

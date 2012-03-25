@@ -12,17 +12,17 @@
 #include "eval.h"
 
 struct Eval {
-  Environment *primitives;
+  Port *errput;
 };
 
 Eval *
-Eval_new (Environment *primitives)
+Eval_new (Port *errput)
 {
   Eval *self = NULL;
 
   alloc_one(self);
 
-  self->primitives = primitives;
+  self->errput = errput;
 
   return self;
 }
@@ -32,6 +32,14 @@ Eval_delete (Eval *self)
 {
   if (self == NULL) return;
   free_(self);
+}
+
+/* ----- */
+
+Port *
+Eval_errput (Eval *self)
+{
+  return self->errput;
 }
 
 /* ----- */
@@ -76,13 +84,9 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
   case SYMBOL:
     {
       Expression *e = NULL;
-
       if ((e = Environment_find(*env, Expression_expr(expr))) == NULL)
-        if ((e = Environment_find(self->primitives,
-                                  Expression_expr(expr))) == NULL)
-          Utils_error("%s: undefined symbol",
-                      Symbol_name(Expression_expr(expr)));
-
+        Utils_error("%s: undefined symbol",
+                    Symbol_name(Expression_expr(expr)));
       return e;
     }
   case PRIMITIVE:
