@@ -75,7 +75,11 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
     return NULL;
 
   Expression_setType(tmp, Expression_type(expr));
-  Expression_setExpr(tmp, Expression_expr(expr));
+  if (expr == *env) {
+    /* dirty hack not to have the defined environment in itself */
+    Expression_setExpr(tmp, Expression_expr(Expression_cdr(expr)));
+  }
+  else Expression_setExpr(tmp, Expression_expr(expr));
 
   return car(args);
 }
