@@ -514,13 +514,21 @@ static Expression *
 PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL, *arguments = NULL;
+  Environment *environment = NULL;
+  int nb_args;
 
-  nb_args("apply", 2, args);
+  minmax_nb_args("apply", 2, 3, args, &nb_args);
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
   if ((arguments = Eval_eval(ev, cadr(args), env)) == NULL)
     return NULL;
+
+  if (nb_args == 3) {
+    if ((environment = Eval_eval(ev, caddr(args), env)) == NULL)
+      return NULL;
+    return Eval_eval(ev, Expression_cons(expr, arguments), &environment);
+  }
 
   return Eval_eval(ev, Expression_cons(expr, arguments), env);
 }
