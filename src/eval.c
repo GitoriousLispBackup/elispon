@@ -61,13 +61,15 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
     return Primitive_proc(Expression_expr(f))(Pair_snd(pair), env, self);
 
   if (Expression_type(f) == FEXPR) {
-    Environment *e = NULL;
+    Environment *environment = NULL;
 
-    e = Fexpr_lexenv(Expression_expr(f));
-    e = Environment_add(e, Fexpr_arg(Expression_expr(f)), Pair_snd(pair));
-    e = Environment_add(e, Fexpr_dynenv(Expression_expr(f)), *env);
+    environment = Fexpr_lexenv(Expression_expr(f));
+    Environment_add(environment, Fexpr_arg(Expression_expr(f)),
+                    Pair_snd(pair));
+    Environment_add(environment, Fexpr_dynenv(Expression_expr(f)),
+                    Expression_new(ENVIRONMENT, *env));
 
-    return Eval_eval(self, Fexpr_body(Expression_expr(f)), &e);
+    return Eval_eval(self, Fexpr_body(Expression_expr(f)), &environment);
   }
 
   return NULL;
@@ -78,8 +80,6 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
 {
   switch (Expression_type(expr)) {
   case PAIR:
-    if (Expression_isNil(expr))
-      return expr;
     return Eval_evalPair(self, Expression_expr(expr), env);
   case SYMBOL:
     {
@@ -90,6 +90,7 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
       return e;
     }
   case PRIMITIVE:
+  case NIL:
   case STRING:
   case NUMBER:
   case FEXPR:

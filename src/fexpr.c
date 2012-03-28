@@ -54,7 +54,7 @@ Fexpr_body (Fexpr *self)
   return self->body;
 }
 
-Expression *
+Environment *
 Fexpr_lexenv (Fexpr *self)
 {
   return self->lexenv;

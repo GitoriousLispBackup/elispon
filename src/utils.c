@@ -54,7 +54,7 @@ Utils_findSymbol (Expression *symbols, char *name)
 {
   Symbol *sym = NULL;
 
-  while (!Expression_isNil(symbols)) {
+  while (Expression_type(symbols) != NIL) {
     sym = Expression_expr(Expression_car(symbols));
     if (strcmp(name, Symbol_name(sym)) == 0)
       return sym;

@@ -68,18 +68,19 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
     return NULL;
   }
 
-  tmp = Expression_new(PAIR, NULL);
-  *env = Environment_add(*env, Expression_expr(car(args)), tmp);
+  tmp = Expression_new(NIL, NULL);
+  Environment_add(*env, Expression_expr(car(args)), tmp);
 
   if ((expr = Eval_eval(ev, cadr(args), env)) == NULL)
     return NULL;
 
   Expression_setType(tmp, Expression_type(expr));
-  if (expr == *env) {
-    /* dirty hack not to have the defined environment in itself */
-    Expression_setExpr(tmp, Expression_expr(Expression_cdr(expr)));
-  }
-  else Expression_setExpr(tmp, Expression_expr(expr));
+  /* if (expr == *env) { */
+  /*   /\* dirty hack not to have the defined environment in itself *\/ */
+  /*   Expression_setExpr(tmp, Expression_expr(Expression_cdr(expr))); */
+  /* } */
+  /* else Expression_setExpr(tmp, Expression_expr(expr)); */
+  Expression_setExpr(tmp, Expression_expr(expr));
 
   return car(args);
 }
@@ -89,7 +90,7 @@ PrimitiveProc_sequence (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
 
-  while (!Expression_isNil(args)) {
+  while (Expression_type(args) != NIL) {
     if (Expression_type(args) != PAIR) {
       Utils_error("sequence: expected proper list");
       return NULL;
@@ -113,7 +114,7 @@ PrimitiveProc_if (Expression *args, Environment **env, Eval *ev)
   if ((cond = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
 
-  if (!Expression_isNil(cond))
+  if (Expression_type(cond) != NIL)
     return Eval_eval(ev, cadr(args), env);
   return Eval_eval(ev, caddr(args), env);
 }
@@ -133,7 +134,7 @@ PrimitiveProc_eq (Expression *args, Environment **env, Eval *ev)
 
   if (Expression_expr(expr1) == Expression_expr(expr2))
     return Expression_new(SYMBOL, Primitive_true());
-  return Expression_new(PAIR, NULL);
+  return Expression_new(NIL, NULL);
 }
 
 static Expression *
@@ -184,7 +185,7 @@ PrimitiveProc_car (Expression *args, Environment **env, Eval *ev)
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
 
-  if (Expression_type(expr) != PAIR || Expression_isNil(expr)) {
+  if (Expression_type(expr) != PAIR) {
     Utils_error("car: expected pair");
     return NULL;
   }
@@ -202,7 +203,7 @@ PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
 
-  if (Expression_type(expr) != PAIR || Expression_isNil(expr)) {
+  if (Expression_type(expr) != PAIR) {
     Utils_error("cdr: expected pair");
     return NULL;
   }
@@ -216,7 +217,7 @@ PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
   Expression *list = NULL, *expr = NULL, *tmp = NULL, *prev = NULL;
 
   list = tmp = Expression_new(PAIR, Pair_new(NULL, NULL));
-  while (Expression_type(args) == PAIR && !Expression_isNil(args)) {
+  while (Expression_type(args) == PAIR) {
     if ((expr = Eval_eval(ev, Expression_car(args), env)) == NULL)
       return NULL;
 
@@ -227,7 +228,7 @@ PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
     args = Expression_cdr(args);
   }
 
-  if (!Expression_isNil(args)) {
+  if (Expression_type(args) != NIL) {
     if ((expr = Eval_eval(ev, args, env)) == NULL)
       return NULL;
 
@@ -262,7 +263,7 @@ PrimitiveHelper_arith (char *name, Number *(*op)(Number *, Number*),
   Expression *list = args, *tmp = NULL;
   Number *result = neutral;
 
-  while (!Expression_isNil(list)) {
+  while (Expression_type(list) != NIL) {
     if (Expression_type(list) != PAIR) {
       Utils_error("%s: expected proper argument list", name);
       return NULL;
@@ -360,7 +361,7 @@ PrimitiveHelper_arithp (char *name, bool (*pred)(Number *, Number*),
 
   args = cdr(args);
 
-  while (!Expression_isNil(args)) {
+  while (Expression_type(args) != NIL) {
     if (Expression_type(args) != PAIR) {
       Utils_error("%s: expected proper argument list", name);
       return NULL;
@@ -389,7 +390,7 @@ PrimitiveProc_equal (Expression *args, Environment **env, Eval *ev)
 {
   if (PrimitiveHelper_arithp("=", Number_eq, args, env, ev))
     return Expression_new(SYMBOL, Primitive_true());
-  return Expression_new(PAIR, NULL);
+  return Expression_new(NIL, NULL);
 }
 
 static Expression *
@@ -397,7 +398,7 @@ PrimitiveProc_lesser (Expression *args, Environment **env, Eval *ev)
 {
   if (PrimitiveHelper_arithp("=", Number_lt, args, env, ev))
     return Expression_new(SYMBOL, Primitive_true());
-  return Expression_new(PAIR, NULL);
+  return Expression_new(NIL, NULL);
 }
 
 static Expression *
@@ -405,25 +406,10 @@ PrimitiveProc_greater (Expression *args, Environment **env, Eval *ev)
 {
   if (PrimitiveHelper_arithp("=", Number_gt, args, env, ev))
     return Expression_new(SYMBOL, Primitive_true());
-  return Expression_new(PAIR, NULL);
+  return Expression_new(NIL, NULL);
 }
 
 /* --- */
-
-static Expression *
-PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *expr = NULL;
-
-  nb_args("null?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_isNil(expr))
-    return Expression_new(SYMBOL, Primitive_true());
-  return Expression_new(PAIR, NULL);
-}
 
 static Expression *
 PrimitiveHelper_typep (char *name, ExprType type,
@@ -438,7 +424,7 @@ PrimitiveHelper_typep (char *name, ExprType type,
 
   if (Expression_type(expr) == type)
     return Expression_new(SYMBOL, Primitive_true());
-  return Expression_new(PAIR, NULL);
+  return Expression_new(NIL, NULL);
 }
 
 static Expression *
@@ -448,18 +434,15 @@ PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
+PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("null?", NIL, args, env, ev);
+}
+
+static Expression *
 PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *expr = NULL;
-
-  nb_args("pair?", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == PAIR && !Expression_isNil(expr))
-    return Expression_new(SYMBOL, Primitive_true());
-  return Expression_new(PAIR, NULL);
+  return PrimitiveHelper_typep("pair?", PAIR, args, env, ev);
 }
 
 static Expression *
@@ -512,14 +495,14 @@ PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 {
   nb_args("environment", 0, args);
 
-  return *env;
+  return Expression_new(ENVIRONMENT, *env);
 }
 
 static Expression *
 PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *expr = NULL;
-  Environment *environment = NULL;
+  Expression *expr = NULL, *environment = NULL;
+  Environment *environ = NULL;
   int nb_args;
 
   minmax_nb_args("eval", 1, 2, args, &nb_args);
@@ -530,7 +513,20 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
   if (nb_args == 2) {
     if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
       return NULL;
-    return Eval_eval(ev, expr, &environment);
+
+    environ = Expression_expr(environment);
+    return Eval_eval(ev, expr, &environ);
+    /* tmp = environment; */
+    /* expr = Eval_eval(ev, expr, &environment); */
+
+    /* if (environment != tmp) { */
+    /*   Symbol *e = NULL; */
+
+    /*   if ((e = Environment_reverseFind(*env, tmp)) != NULL) */
+    /*     Environment_set(*env, e, environment); */
+    /* } */
+
+    /* return expr; */
   }
 
   return Eval_eval(ev, expr, env);
@@ -539,8 +535,8 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
 {
-  Expression *expr = NULL, *arguments = NULL;
-  Environment *environment = NULL;
+  Expression *expr = NULL, *arguments = NULL, *environment = NULL;
+  Environment *environ = NULL;
   int nb_args;
 
   minmax_nb_args("apply", 2, 3, args, &nb_args);
@@ -554,7 +550,8 @@ PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
     if ((environment = Eval_eval(ev, caddr(args), env)) == NULL)
       return NULL;
 
-    return Eval_eval(ev, Expression_cons(expr, arguments), &environment);
+    environ = Expression_expr(environment);
+    return Eval_eval(ev, Expression_cons(expr, arguments), &environ);
     /* TODO maybe if environment is modified and it could be revFind in *env
        before that then *env should be mutated to reflext the changes
        same in eval */
@@ -579,7 +576,8 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
   }
 
   return Expression_cons(Fexpr_body(Expression_expr(expr)),
-                         Fexpr_lexenv(Expression_expr(expr)));
+                         Expression_new(ENVIRONMENT,
+                                        Fexpr_lexenv(Expression_expr(expr))));
 }
 
 #undef car
@@ -653,7 +651,7 @@ Primitive_initialSymbols ()
   if (symbols != NULL)
     return symbols;
 
-  symbols = Expression_new(PAIR, NULL);
+  symbols = Expression_new(NIL, NULL);
   for (i = 0; i < PRIMITIVE_COUNT; i++) {
     symbols = Expression_cons(Expression_new(SYMBOL,
                                              Symbol_new(prim_[i].name)),
@@ -679,11 +677,11 @@ Primitive_initialEnvironment ()
   env = Environment_new(NULL);
   symbols = Primitive_initialSymbols();
   for (i = 0; i < PRIMITIVE_COUNT; i++) {
-    env = Environment_add(env, Utils_findSymbol(symbols, prim_[i].name),
-                          Expression_new(PRIMITIVE, &prim_[i]));
+    Environment_add(env, Utils_findSymbol(symbols, prim_[i].name),
+                    Expression_new(PRIMITIVE, &prim_[i]));
   }
   t = Primitive_true();
-  env = Environment_add(env, t, Expression_new(SYMBOL, t));
+  Environment_add(env, t, Expression_new(SYMBOL, t));
 
   return env;
 }

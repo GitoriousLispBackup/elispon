@@ -60,14 +60,14 @@ Parser_error (Parser *self, char *error)
   return NULL;
 }
 
-static Pair *
+static Expression *
 Parser_parsePair (Parser *self)
 {
   Expression *car = NULL, *cdr = NULL;
 
   if (Lexer_step(self->lexer) == TClosingParen) {
     self->depth--;
-    return NULL;
+    return Expression_new(NIL, NULL);
   }
 
   Lexer_stepback(self->lexer);
@@ -86,10 +86,10 @@ Parser_parsePair (Parser *self)
   }
   else {
     Lexer_stepback(self->lexer);
-    cdr = Expression_new(PAIR, Parser_parsePair(self));
+    cdr = Parser_parsePair(self);
   }
 
-  return Pair_new(car, cdr);
+  return Expression_new(PAIR, Pair_new(car, cdr));
 }
 
 Expression *
@@ -100,7 +100,7 @@ Parser_parseExpression (Parser *self)
   switch (Lexer_step(self->lexer)) {
   case TOpeningParen:
     self->depth++;
-    expr = Expression_new(PAIR, Parser_parsePair(self));
+    expr = Parser_parsePair(self);
     break;
   case TClosingParen:
     self->depth--;

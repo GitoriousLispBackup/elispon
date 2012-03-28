@@ -33,6 +33,8 @@ Expression_delete (Expression *self)
   switch (self->type) {
   case PRIMITIVE:
     break;
+  case NIL:
+    break;
   case PAIR:
     if (self->expr != NULL)
       Pair_delete(self->expr);
@@ -48,6 +50,10 @@ Expression_delete (Expression *self)
     break;
   case FEXPR:
     Fexpr_delete(self->expr);
+    break;
+  case ENVIRONMENT:
+    Environment_delete(self->expr);
+    break;
   default:
     Utils_fatal("Expression_delete: unknown expression type.");
   }
@@ -88,6 +94,8 @@ Expression_typeName (Expression *self)
   switch (self->type) {
   case PRIMITIVE:
     return "primitive";
+  case NIL:
+    return "nil";
   case PAIR:
     return "pair";
   case SYMBOL:
@@ -98,15 +106,11 @@ Expression_typeName (Expression *self)
     return "number";
   case FEXPR:
     return "fexpr";
+  case ENVIRONMENT:
+    return "environment";
   default:
     return "unknown";
   }
-}
-
-bool
-Expression_isNil (Expression *self)
-{
-  return self->type == PAIR && !self->expr;
 }
 
 bool
@@ -124,35 +128,35 @@ Expression_cons (Expression *car, Expression *cdr)
 Expression *
 Expression_car (Expression *self)
 {
-  if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
+  if (self->type != PAIR)
     Utils_fatal("Expression_car: argument is not a pair");
 
-  return Pair_fst(Expression_expr(self));
+  return Pair_fst(self->expr);
 }
 
 Expression *
 Expression_cdr (Expression *self)
 {
-  if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
+  if (self->type != PAIR)
     Utils_fatal("Expression_car: argument is not a pair");
 
-  return Pair_snd(Expression_expr(self));
+  return Pair_snd(self->expr);
 }
 
 void
 Expression_setCar (Expression *self, Expression *expr)
 {
-  if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
+  if (self->type != PAIR)
     Utils_fatal("Expression_setCar: argument is not a pair");
-  Pair_setFst(Expression_expr(self), expr);
+  Pair_setFst(self->expr, expr);
 }
 
 void
 Expression_setCdr (Expression *self, Expression *expr)
 {
-  if (Expression_type(self) != PAIR || Expression_expr(self) == NULL)
+  if (self->type != PAIR)
     Utils_fatal("Expression_setCdr: argument is not a pair");
-  Pair_setSnd(Expression_expr(self), expr);
+  Pair_setSnd(self->expr, expr);
 }
 
 int
@@ -161,11 +165,11 @@ Expression_length (Expression *self)
   Expression *list = NULL;
   int l = 0;
 
-  if (Expression_type(self) != PAIR)
+  if (self->type != PAIR)
     return 0;
 
   list = self;
-  while (Expression_type(list) == PAIR && list->expr != NULL) {
+  while (list->type == PAIR) {
     if (Pair_flag(list->expr)) {
       l = -1;
       break;
@@ -176,7 +180,7 @@ Expression_length (Expression *self)
   }
 
   list = self;
-  while (Expression_type(list) == PAIR && list->expr != NULL) {
+  while (list->type == PAIR) {
     if (!Pair_flag(list->expr)) break;
     Pair_setFlag(list->expr, false);
     list = Expression_cdr(list);

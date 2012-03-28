@@ -14,6 +14,6 @@ void Fexpr_delete (Fexpr *self);
 Symbol *Fexpr_arg (Fexpr *self);
 Symbol *Fexpr_dynenv (Fexpr *self);
 Expression *Fexpr_body (Fexpr *self);
-Expression *Fexpr_lexenv (Fexpr *self);
+Environment *Fexpr_lexenv (Fexpr *self);
 
 #endif /* FEXPR_H__ */

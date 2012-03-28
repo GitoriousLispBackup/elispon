@@ -81,10 +81,8 @@ Printer_printPair (Printer *self, Pair *pair)
   Printer_printExpression(self, Pair_fst(pair));
 
   if (Expression_type(Pair_snd(pair)) == PAIR) {
-    if (!Expression_isNil(Pair_snd(pair))) {
-      Port_printf(self->output, " ");
-      Printer_printPair(self, Expression_expr(Pair_snd(pair)));
-    }
+    Port_printf(self->output, " ");
+    Printer_printPair(self, Expression_expr(Pair_snd(pair)));
   }
   else {
     Port_printf(self->output, " . ");
@@ -117,6 +115,12 @@ Printer_printFexpr (Printer *self, Fexpr *fexpr)
   Port_printf(self->output, "#{fexpr}");
 }
 
+static void
+Printer_printEnvironment (Printer *self, Environment *env)
+{
+  Port_printf(self->output, "#{environment}");
+}
+
 void
 Printer_printExpression (Printer *self, Expression *expr)
 {
@@ -124,10 +128,12 @@ Printer_printExpression (Printer *self, Expression *expr)
   case PRIMITIVE:
     Printer_printPrimitive(self, Expression_expr(expr));
     break;
+  case NIL:
+    Port_printf(self->output, "()");
+    break;
   case PAIR:
     Port_printf(self->output, "(");
-    if (!Expression_isNil(expr))
-      Printer_printPair(self, Expression_expr(expr));
+    Printer_printPair(self, Expression_expr(expr));
     Port_printf(self->output, ")");
     break;
   case SYMBOL:
@@ -141,6 +147,9 @@ Printer_printExpression (Printer *self, Expression *expr)
     break;
   case FEXPR:
     Printer_printFexpr(self, Expression_expr(expr));
+    break;
+  case ENVIRONMENT:
+    Printer_printEnvironment(self, Expression_expr(expr));
     break;
   default:
     Utils_error("Printer: unknown expression type.");
