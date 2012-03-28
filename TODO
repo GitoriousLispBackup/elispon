@@ -24,12 +24,27 @@ c -> #<object:complex>
 
 ---
 
-Environment mutation in fexpr fix: rather than a list, an env should be a locat
-   possibly empty list, and a pointer to parent. (Something like (cons
-   local-assoc parent) if I still want environment to not be encapsulated type)
+need an Environment_copy for fexpr lexical env
+maybe for (environment) too
 
-This would allow to check when returning from eval or fexpr if it's dynamic
-   environment has new bindings and then import them.
+---
+
+define should refuse binding a symbol already present in local environment
+
+---
+
+char type
+#\a
+
+---
+
+vector type
+(vector foo bar baz)
+(make-vector 5)
+
+---
+
+"with" matching in stdlib: see notebook
 
 ---
 
