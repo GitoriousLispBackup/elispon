@@ -75,11 +75,6 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
     return NULL;
 
   Expression_setType(tmp, Expression_type(expr));
-  /* if (expr == *env) { */
-  /*   /\* dirty hack not to have the defined environment in itself *\/ */
-  /*   Expression_setExpr(tmp, Expression_expr(Expression_cdr(expr))); */
-  /* } */
-  /* else Expression_setExpr(tmp, Expression_expr(expr)); */
   Expression_setExpr(tmp, Expression_expr(expr));
 
   return car(args);
@@ -396,7 +391,7 @@ PrimitiveProc_equal (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_lesser (Expression *args, Environment **env, Eval *ev)
 {
-  if (PrimitiveHelper_arithp("=", Number_lt, args, env, ev))
+  if (PrimitiveHelper_arithp("<", Number_lt, args, env, ev))
     return Expression_new(SYMBOL, Primitive_true());
   return Expression_new(NIL, NULL);
 }
@@ -404,7 +399,7 @@ PrimitiveProc_lesser (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_greater (Expression *args, Environment **env, Eval *ev)
 {
-  if (PrimitiveHelper_arithp("=", Number_gt, args, env, ev))
+  if (PrimitiveHelper_arithp(">", Number_gt, args, env, ev))
     return Expression_new(SYMBOL, Primitive_true());
   return Expression_new(NIL, NULL);
 }
@@ -469,6 +464,12 @@ PrimitiveProc_fexprp (Expression *args, Environment **env, Eval *ev)
   return PrimitiveHelper_typep("fexpr?", FEXPR, args, env, ev);
 }
 
+static Expression *
+PrimitiveProc_environmentp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("environment?", ENVIRONMENT, args, env, ev);
+}
+
 /* --- */
 
 static Expression *
@@ -485,7 +486,8 @@ PrimitiveProc_epsilon (Expression *args, Environment **env, Eval *ev)
 
   return Expression_new(FEXPR, Fexpr_new(Expression_expr(car(args)),
                                          Expression_expr(cadr(args)),
-                                         caddr(args), *env));
+                                         caddr(args),
+                                         /*Environment_copy(*/*env/*)*/));
 }
 
 /* --- */
@@ -516,17 +518,6 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 
     environ = Expression_expr(environment);
     return Eval_eval(ev, expr, &environ);
-    /* tmp = environment; */
-    /* expr = Eval_eval(ev, expr, &environment); */
-
-    /* if (environment != tmp) { */
-    /*   Symbol *e = NULL; */
-
-    /*   if ((e = Environment_reverseFind(*env, tmp)) != NULL) */
-    /*     Environment_set(*env, e, environment); */
-    /* } */
-
-    /* return expr; */
   }
 
   return Eval_eval(ev, expr, env);
@@ -552,9 +543,7 @@ PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
 
     environ = Expression_expr(environment);
     return Eval_eval(ev, Expression_cons(expr, arguments), &environ);
-    /* TODO maybe if environment is modified and it could be revFind in *env
-       before that then *env should be mutated to reflext the changes
-       same in eval */
+    /* TODO apply should not be a primitive */
   }
 
   return Eval_eval(ev, Expression_cons(expr, arguments), env);
@@ -589,7 +578,7 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 31
+#define PRIMITIVE_COUNT 32
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
@@ -621,6 +610,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "string?",      PrimitiveProc_stringp },
   { "number?",      PrimitiveProc_numberp },
   { "fexpr?",       PrimitiveProc_fexprp },
+  { "environment?", PrimitiveProc_environmentp },
 
   { "ε",            PrimitiveProc_epsilon },
 
