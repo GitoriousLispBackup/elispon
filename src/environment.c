@@ -30,6 +30,19 @@ Environment_delete (Environment *self)
   free_(self);
 }
 
+Environment *
+Environment_copy (Environment *self)
+{
+  Environment *env = NULL;
+
+  alloc_one(env);
+
+  env->assoc = self->assoc;
+  env->parent = self->parent;
+
+  return env;
+}
+
 /* ----- */
 
 #define caar(e) Expression_expr(Expression_car(Expression_car(e)))

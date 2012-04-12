@@ -5,13 +5,13 @@ Printer should check this flag to print accordingly.
 
 ---
 
-(define-struct foo (bar baz))
-(define lala (make-foo 1 2))
-(foo-bar lala) -> 1
-(foo-baz lala) -> 2
-(foo? lala) -> t
-lala -> #<struct:foo>
-(type lala) -> foo
+(define-struct complex (r i))
+(define lala (make-complex 1 2))
+(complex-r lala) -> 1
+(complex-i lala) -> 2
+(complex? lala) -> t
+lala -> #<struct:complex>
+(type lala) -> complex
 
 or
 
@@ -20,12 +20,12 @@ complex -> #<struct:complex>
 (define c (make complex 4 2)) -> c
 c -> #<object:complex>
 (is-a? complex c) -> t
-(complex r c) -> 4
+(complex 'r c) -> 4
 
----
-
-need an Environment_copy for fexpr lexical env
-maybe for (environment) too
+other idea:
+(define c (complex 4 2)) -> c
+(c 'r) or (c . 'r) -> 4
+still need is-a?
 
 ---
 

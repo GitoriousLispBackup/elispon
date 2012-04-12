@@ -8,6 +8,7 @@ typedef struct Environment Environment;
 
 Environment *Environment_new (Environment *base);
 void Environment_delete (Environment *self);
+Environment *Environment_copy (Environment *self);
 
 Expression *Environment_find (Environment *self, Symbol *sym);
 Symbol *Environment_reverseFind (Environment *self, Expression *expr);

@@ -487,7 +487,7 @@ PrimitiveProc_epsilon (Expression *args, Environment **env, Eval *ev)
   return Expression_new(FEXPR, Fexpr_new(Expression_expr(car(args)),
                                          Expression_expr(cadr(args)),
                                          caddr(args),
-                                         /*Environment_copy(*/*env/*)*/));
+                                         Environment_copy(*env)));
 }
 
 /* --- */
@@ -497,7 +497,7 @@ PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 {
   nb_args("environment", 0, args);
 
-  return Expression_new(ENVIRONMENT, *env);
+  return Expression_new(ENVIRONMENT, Environment_copy(*env));
 }
 
 static Expression *
