@@ -527,32 +527,6 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
-PrimitiveProc_apply (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *expr = NULL, *arguments = NULL, *environment = NULL;
-  Environment *environ = NULL;
-  int nb_args;
-
-  minmax_nb_args("apply", 2, 3, args, &nb_args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-  if ((arguments = Eval_eval(ev, cadr(args), env)) == NULL)
-    return NULL;
-
-  if (nb_args == 3) {
-    if ((environment = Eval_eval(ev, caddr(args), env)) == NULL)
-      return NULL;
-
-    environ = Expression_expr(environment);
-    return Eval_eval(ev, Expression_cons(expr, arguments), &environ);
-    /* TODO apply should not be a primitive */
-  }
-
-  return Eval_eval(ev, Expression_cons(expr, arguments), env);
-}
-
-static Expression *
 PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
@@ -581,7 +555,7 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 32
+#define PRIMITIVE_COUNT 31
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
@@ -619,7 +593,6 @@ Primitive prim_[PRIMITIVE_COUNT] = {
 
   { "environment",  PrimitiveProc_environment },
   { "eval",         PrimitiveProc_eval },
-  { "apply",        PrimitiveProc_apply },
 
   { "%open-fexpr%", PrimitiveProc_open_fexpr }
 };
