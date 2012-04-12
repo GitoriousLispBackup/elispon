@@ -84,7 +84,7 @@ Printer_printPair (Printer *self, Pair *pair)
     Port_printf(self->output, " ");
     Printer_printPair(self, Expression_expr(Pair_snd(pair)));
   }
-  else {
+  else if (Expression_type(Pair_snd(pair)) != NIL) {
     Port_printf(self->output, " . ");
     Printer_printExpression(self, Pair_snd(pair));
   }
