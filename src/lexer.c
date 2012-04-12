@@ -149,6 +149,34 @@ Lexer_readToken (Lexer *self)
 }
 
 static bool
+Lexer_readCharacter (Lexer *self)
+{
+  if (Lexer_getc(self) != '\\') {
+    Lexer_error(self, "malformed character");
+    return false;
+  }
+
+  Lexer_readToken(self);
+
+  if (self->size != 1) {
+    if (strcmp(self->token, "newline") == 0)
+      self->token[0] = '\n';
+    else if (strcmp(self->token, "tab") == 0)
+      self->token[0] = '\t';
+    else if (strcmp(self->token, "space") == 0)
+      self->token[0] = ' ';
+    else {
+      Lexer_error(self, "unkown character name");
+      return false;
+    }
+    self->size = 1;
+    self->token[1] = '\0';
+  }
+
+  return true;
+}
+
+static bool
 Lexer_readString (Lexer *self)
 {
   int escaped = 0;
@@ -238,6 +266,11 @@ Lexer_step (Lexer *self)
       break;
     case ')':
       self->type = TClosingParen;
+      break;
+    case '#':
+      if (Lexer_readCharacter(self))
+        self->type = TCharacter;
+      else return TUnkown;
       break;
     case '"':
       if (Lexer_readString(self))

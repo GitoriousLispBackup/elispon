@@ -5,6 +5,7 @@
 #include "expression.h"
 #include "pair.h"
 #include "symbol.h"
+#include "character.h"
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
@@ -450,15 +451,21 @@ PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
-PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
+PrimitiveProc_characterp (Expression *args, Environment **env, Eval *ev)
 {
-  return PrimitiveHelper_typep("number?", NUMBER, args, env, ev);
+  return PrimitiveHelper_typep("character?", CHARACTER, args, env, ev);
 }
 
 static Expression *
 PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
 {
   return PrimitiveHelper_typep("string?", STRING, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("number?", NUMBER, args, env, ev);
 }
 
 static Expression *
@@ -555,7 +562,7 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 31
+#define PRIMITIVE_COUNT 32
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
@@ -584,6 +591,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "primitive?",   PrimitiveProc_primitivep },
   { "pair?",        PrimitiveProc_pairp },
   { "symbol?",      PrimitiveProc_symbolp },
+  { "character?",   PrimitiveProc_characterp },
   { "string?",      PrimitiveProc_stringp },
   { "number?",      PrimitiveProc_numberp },
   { "fexpr?",       PrimitiveProc_fexprp },

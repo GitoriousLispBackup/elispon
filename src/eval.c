@@ -5,6 +5,7 @@
 #include "primitive.h"
 #include "pair.h"
 #include "symbol.h"
+#include "character.h"
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
@@ -91,6 +92,7 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
     }
   case PRIMITIVE:
   case NIL:
+  case CHARACTER:
   case STRING:
   case NUMBER:
   case FEXPR:

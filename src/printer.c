@@ -4,6 +4,7 @@
 #include "primitive.h"
 #include "pair.h"
 #include "symbol.h"
+#include "character.h"
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
@@ -98,6 +99,24 @@ Printer_printSymbol (Printer *self, Symbol *sym)
 }
 
 static void
+Printer_printCharacter (Printer *self, Character *c)
+{
+  switch (Character_c(c)) {
+  case '\n':
+    Port_printf(self->output, "#\\newline");
+    break;
+  case '\t':
+    Port_printf(self->output, "#\\tab");
+    break;
+  case ' ':
+    Port_printf(self->output, "#\\space");
+    break;
+  default:
+    Port_printf(self->output, "#\\%c", Character_c(c));
+  }
+}
+
+static void
 Printer_printString (Printer *self, String *str)
 {
   Port_printf(self->output, "\"%s\"", String_buf(str));
@@ -138,6 +157,9 @@ Printer_printExpression (Printer *self, Expression *expr)
     break;
   case SYMBOL:
     Printer_printSymbol(self, Expression_expr(expr));
+    break;
+  case CHARACTER:
+    Printer_printCharacter(self, Expression_expr(expr));
     break;
   case STRING:
     Printer_printString(self, Expression_expr(expr));

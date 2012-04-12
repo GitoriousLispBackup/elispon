@@ -7,7 +7,7 @@ typedef struct Lexer Lexer;
 
 typedef enum {
   TOpeningParen, TClosingParen, TDot,
-  TSymbol, TString, TNumber,
+  TSymbol, TCharacter, TString, TNumber,
   TEnd, TUnkown
 } TokenType;
 

@@ -4,6 +4,7 @@
 #include "primitive.h"
 #include "pair.h"
 #include "symbol.h"
+#include "character.h"
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
@@ -41,6 +42,9 @@ Expression_delete (Expression *self)
     break;
   case SYMBOL:
     Symbol_delete(self->expr);
+    break;
+  case CHARACTER:
+    Character_delete(self->expr);
     break;
   case STRING:
     String_delete(self->expr);
@@ -100,6 +104,8 @@ Expression_typeName (Expression *self)
     return "pair";
   case SYMBOL:
     return "symbol";
+  case CHARACTER:
+    return "character";
   case STRING:
     return "string";
   case NUMBER:

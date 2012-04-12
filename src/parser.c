@@ -4,6 +4,7 @@
 #include "expression.h"
 #include "pair.h"
 #include "symbol.h"
+#include "character.h"
 #include "string.h"
 #include "number.h"
 #include "primitive.h"
@@ -119,6 +120,9 @@ Parser_parseExpression (Parser *self)
       }
       else expr = Expression_new(SYMBOL, sym);
     }
+    break;
+  case TCharacter:
+    expr = Expression_new(CHARACTER, Character_new(*Lexer_token(self->lexer)));
     break;
   case TString:
     expr = Expression_new(STRING, String_new(Lexer_token(self->lexer)));

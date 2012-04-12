@@ -33,8 +33,10 @@ define should refuse binding a symbol already present in local environment
 
 ---
 
-char type
-#\a
+char: actually need to use strings internally because of ε, é, etc. But how to
+   deal with #\foo for instance? Maybe just authorize it! It's a kind of
+   autoquoted symbol, might be useful? What is a character if not a kind of
+   autoquoted symbol anyway?
 
 ---
 
