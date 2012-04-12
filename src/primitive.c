@@ -116,11 +116,11 @@ PrimitiveProc_if (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
-PrimitiveProc_eq (Expression *args, Environment **env, Eval *ev)
+PrimitiveProc_same (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr1 = NULL, *expr2;
 
-  nb_args("eq?", 2, args);
+  nb_args("same?", 2, args);
 
   if ((expr1 = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
@@ -568,7 +568,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
   { "sequence",     PrimitiveProc_sequence },
   { "if",           PrimitiveProc_if },
-  { "eq?",          PrimitiveProc_eq },
+  { "same?",        PrimitiveProc_same },
   { "error",        PrimitiveProc_error },
 
   { "cons",         PrimitiveProc_cons },
@@ -659,4 +659,3 @@ Primitive_initialEnvironment ()
 
   return env;
 }
-

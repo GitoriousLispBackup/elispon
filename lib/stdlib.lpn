@@ -71,7 +71,7 @@
                  (define c (eval (car clause) e))
                  (if c
                      (if (and (= len 3)
-                              (eq? (car (cdr clause)) (quote =>)))
+                              (same? (car (cdr clause)) (quote =>)))
                          ((eval (car (cdr (cdr clause))) e) c)
                          (eval (car (cdr clause)) e))
                      (apply cond (cdr args) e))))))))
