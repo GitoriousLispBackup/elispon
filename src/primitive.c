@@ -229,7 +229,10 @@ PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
 
     Expression_setCdr(prev, expr);
   }
-  else Expression_setExpr(tmp, NULL);
+  else {
+    Expression_setExpr(tmp, NULL);
+    Expression_setType(tmp, NIL);
+  }
 
 
   return list;
