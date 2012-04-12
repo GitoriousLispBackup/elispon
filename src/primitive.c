@@ -476,14 +476,14 @@ PrimitiveProc_environmentp (Expression *args, Environment **env, Eval *ev)
 /* --- */
 
 static Expression *
-PrimitiveProc_epsilon (Expression *args, Environment **env, Eval *ev)
+PrimitiveProc_vau (Expression *args, Environment **env, Eval *ev)
 {
-  min_nb_args("ε", 3, args);
+  min_nb_args("vau", 3, args);
 
   if (Expression_type(car(args)) != SYMBOL ||
       Expression_type(cadr(args)) != SYMBOL ||
       Expression_expr(car(args)) == Expression_expr(cadr(args))) {
-    Utils_error("ε: expected the first two arguments to be different symbols");
+    Utils_error("vau: expected the first two arguments to be different symbols");
     return NULL;
   }
 
@@ -615,7 +615,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "fexpr?",       PrimitiveProc_fexprp },
   { "environment?", PrimitiveProc_environmentp },
 
-  { "ε",            PrimitiveProc_epsilon },
+  { "vau",          PrimitiveProc_vau },
 
   { "environment",  PrimitiveProc_environment },
   { "eval",         PrimitiveProc_eval },
