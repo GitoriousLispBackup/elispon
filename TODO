@@ -16,7 +16,7 @@ lala -> #<struct:complex>
 or
 
 (define complex (struct r i)) -> complex
-complex -> #<struct:complex>
+complex -> #<struct>
 (define c (make complex 4 2)) -> c
 c -> #<object:complex>
 (is-a? complex c) -> t

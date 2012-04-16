@@ -56,7 +56,7 @@ REPL_read (REPL *self)
 {
   int c, depth = 0, line = 1;
   bool str = false, escaped = false;
-  char name[64];
+  char delimiter, name[64];
   Port *in = NULL;
 
   self->count++;
@@ -68,8 +68,11 @@ REPL_read (REPL *self)
 
     if (c == EOF) return NULL;
 
-    if (!str && !escaped && c == '"') str = true;
-    else if (str && !escaped && c == '"') str = false;
+    if (!str && !escaped && (c == '"' || c == '|')) {
+      str = true;
+      delimiter = c;
+    }
+    else if (str && !escaped && c == delimiter) str = false;
     else if (!str && !escaped && c == '(') depth++;
     else if (!str && !escaped && c == ')') depth--;
 

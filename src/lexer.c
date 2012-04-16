@@ -177,7 +177,7 @@ Lexer_readCharacter (Lexer *self)
 }
 
 static bool
-Lexer_readString (Lexer *self)
+Lexer_readString (Lexer *self, char delimiter)
 {
   int escaped = 0;
 
@@ -186,6 +186,7 @@ Lexer_readString (Lexer *self)
     if (escaped) {
       switch (self->c) {
       case '\\':
+      case '|':
       case '"':
         escaped = self->c;
         break;
@@ -218,7 +219,7 @@ Lexer_readString (Lexer *self)
       escaped = 0;
     }
     else if (self->c == '\\') escaped = 1;
-    else if (self->c == '"') {
+    else if (self->c == delimiter) {
       self->token[self->size] = '\0';
       return true;
     }
@@ -235,7 +236,7 @@ Lexer_readString (Lexer *self)
     }
   }
 
-  Lexer_error(self, "reached EOF before end of string");
+  Lexer_error(self, "reached EOF before string or symbol delimiter");
   return false;
 }
 
@@ -272,8 +273,13 @@ Lexer_step (Lexer *self)
         self->type = TCharacter;
       else return TUnkown;
       break;
+    case '|':
+      if (Lexer_readString(self, '|'))
+        self->type = TSymbol;
+      else return TUnkown;
+      break;
     case '"':
-      if (Lexer_readString(self))
+      if (Lexer_readString(self, '"'))
         self->type = TString;
       else return TUnkown;
       break;
