@@ -1,6 +1,5 @@
 #include <stdbool.h>
 #include "utils.h"
-#include "expression.h"
 #include "primitive.h"
 #include "pair.h"
 #include "symbol.h"
@@ -8,6 +7,9 @@
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
+#include "environment.h"
+#include "struct.h"
+#include "expression.h"
 
 struct Expression {
   ExprType type;
@@ -58,6 +60,8 @@ Expression_delete (Expression *self)
   case ENVIRONMENT:
     Environment_delete(self->expr);
     break;
+  case STRUCT:
+    Struct_delete(self->expr);
   default:
     Utils_fatal("Expression_delete: unknown expression type.");
   }
@@ -114,6 +118,8 @@ Expression_typeName (Expression *self)
     return "fexpr";
   case ENVIRONMENT:
     return "environment";
+  case STRUCT:
+    return "struct";
   default:
     return "unknown";
   }

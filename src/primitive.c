@@ -10,6 +10,7 @@
 #include "number.h"
 #include "fexpr.h"
 #include "environment.h"
+#include "struct.h"
 #include "eval.h"
 #include "primitive.h"
 
@@ -152,6 +153,92 @@ PrimitiveProc_error (Expression *args, Environment **env, Eval *ev)
               String_buf(Expression_expr(expr)));
 
   return NULL;
+}
+
+static Expression *
+PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL, *environment = NULL;
+  Environment *environ = NULL;
+  int nb_args;
+
+  minmax_nb_args("eval", 1, 2, args, &nb_args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (nb_args == 2) {
+    if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
+      return NULL;
+
+    environ = Expression_expr(environment);
+    return Eval_eval(ev, expr, &environ);
+  }
+
+  return Eval_eval(ev, expr, env);
+}
+
+/* --- */
+
+static Expression *
+PrimitiveProc_vau (Expression *args, Environment **env, Eval *ev)
+{
+  nb_args("vau", 3, args);
+
+  if (Expression_type(car(args)) != SYMBOL ||
+      Expression_type(cadr(args)) != SYMBOL ||
+      Expression_expr(car(args)) == Expression_expr(cadr(args))) {
+    Utils_error("vau: expected the first two arguments to be different"
+                " symbols");
+    return NULL;
+  }
+
+  return Expression_new(FEXPR, Fexpr_new(Expression_expr(car(args)),
+                                         Expression_expr(cadr(args)),
+                                         caddr(args),
+                                         Environment_copy(*env)));
+}
+
+static Expression *
+PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
+{
+  nb_args("environment", 0, args);
+
+  return Expression_new(ENVIRONMENT, Environment_copy(*env));
+}
+
+static Expression *
+PrimitiveProc_struct (Expression *args, Environment **env, Eval *ev)
+{
+  Struct *structure = NULL;
+  Expression *expr = NULL;
+  int i = 0, size;
+
+  min_nb_args ("struct", 1, args);
+
+  size = Expression_length(args);
+
+  structure = Struct_new(size);
+
+  while (Expression_type(args) != NIL) {
+    if (Expression_type(args) != PAIR) {
+      Utils_error("struct: expected proper list");
+      return NULL;
+    }
+    if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+      return NULL;
+
+    if (Expression_type(expr) != SYMBOL) {
+      Utils_error("struct: members name must be symbol");
+      return NULL;
+    }
+
+    Struct_declareMember(structure, i++, Expression_expr(expr));
+
+    args = cdr(args);
+  }
+
+  return Expression_new(STRUCT, structure);
 }
 
 /* --- */
@@ -480,58 +567,13 @@ PrimitiveProc_environmentp (Expression *args, Environment **env, Eval *ev)
   return PrimitiveHelper_typep("environment?", ENVIRONMENT, args, env, ev);
 }
 
-/* --- */
-
 static Expression *
-PrimitiveProc_vau (Expression *args, Environment **env, Eval *ev)
+PrimitiveProc_structp (Expression *args, Environment **env, Eval *ev)
 {
-  min_nb_args("vau", 3, args);
-
-  if (Expression_type(car(args)) != SYMBOL ||
-      Expression_type(cadr(args)) != SYMBOL ||
-      Expression_expr(car(args)) == Expression_expr(cadr(args))) {
-    Utils_error("vau: expected the first two arguments to be different symbols");
-    return NULL;
-  }
-
-  return Expression_new(FEXPR, Fexpr_new(Expression_expr(car(args)),
-                                         Expression_expr(cadr(args)),
-                                         caddr(args),
-                                         Environment_copy(*env)));
+  return PrimitiveHelper_typep("struct?", STRUCT, args, env, ev);
 }
 
 /* --- */
-
-static Expression *
-PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
-{
-  nb_args("environment", 0, args);
-
-  return Expression_new(ENVIRONMENT, Environment_copy(*env));
-}
-
-static Expression *
-PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *expr = NULL, *environment = NULL;
-  Environment *environ = NULL;
-  int nb_args;
-
-  minmax_nb_args("eval", 1, 2, args, &nb_args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (nb_args == 2) {
-    if ((environment = Eval_eval(ev, cadr(args), env)) == NULL)
-      return NULL;
-
-    environ = Expression_expr(environment);
-    return Eval_eval(ev, expr, &environ);
-  }
-
-  return Eval_eval(ev, expr, env);
-}
 
 static Expression *
 PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
@@ -544,13 +586,40 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
     return NULL;
 
   if (Expression_type(expr) != FEXPR) {
-    Utils_error("car: expected fexpr");
+    Utils_error("%%open-fexpr%%: expected fexpr");
     return NULL;
   }
 
   return Expression_cons(Fexpr_body(Expression_expr(expr)),
                          Expression_new(ENVIRONMENT,
                                         Fexpr_lexenv(Expression_expr(expr))));
+}
+
+static Expression *
+PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+  Symbol **members = NULL;
+  int i, size;
+
+  nb_args("%open-struct%", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != STRUCT) {
+    Utils_error("%%open-struct%%: expected struct");
+    return NULL;
+  }
+
+  size = Struct_size(Expression_expr(expr));
+  members = Struct_members(Expression_expr(expr));
+
+  expr = Expression_new(NIL, NULL);
+  for (i = size - 1; i >= 0; i--)
+    expr = Expression_cons(Expression_new(SYMBOL, members[i]), expr);
+
+  return expr;
 }
 
 #undef car
@@ -562,7 +631,7 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 32
+#define PRIMITIVE_COUNT 35
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
@@ -570,6 +639,11 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "if",           PrimitiveProc_if },
   { "same?",        PrimitiveProc_same },
   { "error",        PrimitiveProc_error },
+  { "eval",         PrimitiveProc_eval },
+
+  { "vau",          PrimitiveProc_vau },
+  { "environment",  PrimitiveProc_environment },
+  { "struct",       PrimitiveProc_struct },
 
   { "cons",         PrimitiveProc_cons },
   { "car",          PrimitiveProc_car },
@@ -596,13 +670,10 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "number?",      PrimitiveProc_numberp },
   { "fexpr?",       PrimitiveProc_fexprp },
   { "environment?", PrimitiveProc_environmentp },
+  { "struct?",      PrimitiveProc_structp },
 
-  { "vau",          PrimitiveProc_vau },
-
-  { "environment",  PrimitiveProc_environment },
-  { "eval",         PrimitiveProc_eval },
-
-  { "%open-fexpr%", PrimitiveProc_open_fexpr }
+  { "%open-fexpr%", PrimitiveProc_open_fexpr },
+  { "%open-struct%", PrimitiveProc_open_struct }
 };
 
 Symbol *

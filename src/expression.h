@@ -7,7 +7,7 @@ typedef struct Expression Expression;
 
 typedef enum {
   PRIMITIVE, NIL, PAIR, SYMBOL, CHARACTER, STRING, NUMBER,
-  FEXPR, ENVIRONMENT
+  FEXPR, ENVIRONMENT, STRUCT
 } ExprType;
 
 Expression *Expression_new (ExprType type, void *expr);

@@ -10,6 +10,7 @@
 #include "number.h"
 #include "fexpr.h"
 #include "environment.h"
+#include "struct.h"
 #include "eval.h"
 
 struct Eval {
@@ -96,6 +97,8 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
   case STRING:
   case NUMBER:
   case FEXPR:
+  case ENVIRONMENT:
+  case STRUCT:
     return expr;
   default:
     Utils_error("Eval: unknown expression type");

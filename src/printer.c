@@ -8,6 +8,8 @@
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
+#include "environment.h"
+#include "struct.h"
 #include "port.h"
 #include "printer.h"
 
@@ -141,6 +143,7 @@ Printer_printExpression (Printer *self, Expression *expr)
     break;
   case FEXPR:
   case ENVIRONMENT:
+  case STRUCT:
     Port_printf(self->output, "#{%s}", Expression_typeName(expr));
     break;
   default:
