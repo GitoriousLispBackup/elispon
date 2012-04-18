@@ -91,10 +91,10 @@ PrimitiveProc_sequence (Expression *args, Environment **env, Eval *ev)
       Utils_error("sequence: expected proper list");
       return NULL;
     }
-    if ((expr = Eval_eval(ev, Expression_car(args), env)) == NULL)
+    if ((expr = Eval_eval(ev, car(args), env)) == NULL)
       return NULL;
 
-    args = Expression_cdr(args);
+    args = cdr(args);
   }
 
   return expr;
@@ -186,7 +186,7 @@ PrimitiveProc_car (Expression *args, Environment **env, Eval *ev)
     return NULL;
   }
 
-  return Expression_car(expr);
+  return car(expr);
 }
 
 static Expression *
@@ -204,7 +204,7 @@ PrimitiveProc_cdr (Expression *args, Environment **env, Eval *ev)
     return NULL;
   }
 
-  return Expression_cdr(expr);
+  return cdr(expr);
 }
 
 static Expression *
@@ -214,14 +214,14 @@ PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
 
   list = tmp = Expression_new(PAIR, Pair_new(NULL, NULL));
   while (Expression_type(args) == PAIR) {
-    if ((expr = Eval_eval(ev, Expression_car(args), env)) == NULL)
+    if ((expr = Eval_eval(ev, car(args), env)) == NULL)
       return NULL;
 
     Expression_setCar(tmp, expr);
     Expression_setCdr(tmp, Expression_new(PAIR, Pair_new(NULL, NULL)));
     prev = tmp;
-    tmp = Expression_cdr(tmp);
-    args = Expression_cdr(args);
+    tmp = cdr(tmp);
+    args = cdr(args);
   }
 
   if (Expression_type(args) != NIL) {

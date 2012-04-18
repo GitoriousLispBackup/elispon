@@ -33,6 +33,24 @@ define should refuse binding a symbol already present in local environment
 
 ---
 
+if struct eval its arguments, which means that (struct a b) must actually be
+   (struct 'a 'b), then maybe define should too.
+
+---
+
+(with bindings
+  ...)
+
+bindings should not be visible outside the with, but those introduced in ...
+   should be.
+
+before with: {assoc1,parent1}
+during with-binding: {assoc2,{assoc1,parent1}}
+during with-body: env={assoc3,{assoc2,{assoc1,parent1}}}
+after with: env={assoc3+assoc1,parent1}
+
+---
+
 char: actually need to use strings internally because of ε, é, etc. But how to
    deal with #\foo for instance? Maybe just authorize it! It's a kind of
    autoquoted symbol, might be useful? What is a character if not a kind of

@@ -135,7 +135,7 @@ Expression *
 Expression_car (Expression *self)
 {
   if (self->type != PAIR)
-    Utils_fatal("Expression_car: argument is not a pair");
+    Utils_fatal("Expression_car: argument is not a pair.");
 
   return Pair_fst(self->expr);
 }
@@ -144,7 +144,7 @@ Expression *
 Expression_cdr (Expression *self)
 {
   if (self->type != PAIR)
-    Utils_fatal("Expression_car: argument is not a pair");
+    Utils_fatal("Expression_car: argument is not a pair.");
 
   return Pair_snd(self->expr);
 }
@@ -153,7 +153,7 @@ void
 Expression_setCar (Expression *self, Expression *expr)
 {
   if (self->type != PAIR)
-    Utils_fatal("Expression_setCar: argument is not a pair");
+    Utils_fatal("Expression_setCar: argument is not a pair.");
   Pair_setFst(self->expr, expr);
 }
 
@@ -161,7 +161,7 @@ void
 Expression_setCdr (Expression *self, Expression *expr)
 {
   if (self->type != PAIR)
-    Utils_fatal("Expression_setCdr: argument is not a pair");
+    Utils_fatal("Expression_setCdr: argument is not a pair.");
   Pair_setSnd(self->expr, expr);
 }
 
