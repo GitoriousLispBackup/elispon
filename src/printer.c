@@ -39,12 +39,6 @@ Printer_delete (Printer *self)
 /* ----- */
 
 static void
-Printer_printPrimitive (Printer *self, Primitive *prim)
-{
-  Port_printf(self->output, "#{primitive:%s}", Primitive_name(prim));
-}
-
-static void
 Printer_printInfiniteList (Printer *self, Pair *pair, Pair *start)
 {
   if (pair == start) {
@@ -96,6 +90,7 @@ static void
 Printer_printSymbol (Printer *self, Symbol *sym)
 {
   Port_printf(self->output, "%s", Symbol_name(sym));
+  /* TODO: should print symbol between |s if it contains spaces, quotes… */
 }
 
 static void
@@ -116,36 +111,13 @@ Printer_printCharacter (Printer *self, Character *c)
   }
 }
 
-static void
-Printer_printString (Printer *self, String *str)
-{
-  Port_printf(self->output, "\"%s\"", String_buf(str));
-}
-
-static void
-Printer_printNumber (Printer *self, Number *num)
-{
-  Port_printf(self->output, "%g", Number_val(num));
-}
-
-static void
-Printer_printFexpr (Printer *self, Fexpr *fexpr)
-{
-  Port_printf(self->output, "#{fexpr}");
-}
-
-static void
-Printer_printEnvironment (Printer *self, Environment *env)
-{
-  Port_printf(self->output, "#{environment}");
-}
-
 void
 Printer_printExpression (Printer *self, Expression *expr)
 {
   switch (Expression_type(expr)) {
   case PRIMITIVE:
-    Printer_printPrimitive(self, Expression_expr(expr));
+    Port_printf(self->output, "#{primitive:%s}",
+                Primitive_name(Expression_expr(expr)));
     break;
   case NIL:
     Port_printf(self->output, "()");
@@ -162,18 +134,16 @@ Printer_printExpression (Printer *self, Expression *expr)
     Printer_printCharacter(self, Expression_expr(expr));
     break;
   case STRING:
-    Printer_printString(self, Expression_expr(expr));
+    Port_printf(self->output, "\"%s\"", String_buf(Expression_expr(expr)));
     break;
   case NUMBER:
-    Printer_printNumber(self, Expression_expr(expr));
+    Port_printf(self->output, "%g", Number_val(Expression_expr(expr)));
     break;
   case FEXPR:
-    Printer_printFexpr(self, Expression_expr(expr));
-    break;
   case ENVIRONMENT:
-    Printer_printEnvironment(self, Expression_expr(expr));
+    Port_printf(self->output, "#{%s}", Expression_typeName(expr));
     break;
   default:
-    Utils_error("Printer: unknown expression type.");
+    Utils_error("Printer: unknown expression type");
   }
 }
