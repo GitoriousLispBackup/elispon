@@ -24,6 +24,7 @@ void
 Struct_delete (Struct *self)
 {
   if (self == NULL) return;
+  free_(self->members);
   free_(self);
 }
 

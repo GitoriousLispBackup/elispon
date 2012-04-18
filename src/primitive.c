@@ -214,8 +214,6 @@ PrimitiveProc_struct (Expression *args, Environment **env, Eval *ev)
   Expression *member = NULL;
   int i = 0, size;
 
-  min_nb_args ("struct", 1, args);
-
   size = Expression_length(args);
 
   structure = Struct_new(size);
