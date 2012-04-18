@@ -211,7 +211,7 @@ static Expression *
 PrimitiveProc_struct (Expression *args, Environment **env, Eval *ev)
 {
   Struct *structure = NULL;
-  Expression *expr = NULL;
+  Expression *member = NULL;
   int i = 0, size;
 
   min_nb_args ("struct", 1, args);
@@ -225,15 +225,13 @@ PrimitiveProc_struct (Expression *args, Environment **env, Eval *ev)
       Utils_error("struct: expected proper list");
       return NULL;
     }
-    if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-      return NULL;
 
-    if (Expression_type(expr) != SYMBOL) {
+    if (Expression_type(member = car(args)) != SYMBOL) {
       Utils_error("struct: members name must be symbol");
       return NULL;
     }
 
-    Struct_declareMember(structure, i++, Expression_expr(expr));
+    Struct_declareMember(structure, i++, Expression_expr(member));
 
     args = cdr(args);
   }

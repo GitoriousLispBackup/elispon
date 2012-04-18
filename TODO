@@ -33,11 +33,6 @@ define should refuse binding a symbol already present in local environment
 
 ---
 
-if struct eval its arguments, which means that (struct a b) must actually be
-   (struct 'a 'b), then maybe define should too.
-
----
-
 (with bindings
   ...)
 
