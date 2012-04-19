@@ -5,27 +5,12 @@ Printer should check this flag to print accordingly.
 
 ---
 
-(define-struct complex (r i))
-(define lala (make-complex 1 2))
-(complex-r lala) -> 1
-(complex-i lala) -> 2
-(complex? lala) -> t
-lala -> #<struct:complex>
-(type lala) -> complex
-
-or
-
 (define complex (struct r i)) -> complex
 complex -> #<struct>
-(define c (make complex 4 2)) -> c
-c -> #<object:complex>
-(is-a? complex c) -> t
-(complex 'r c) -> 4
-
-other idea:
 (define c (complex 4 2)) -> c
-(c 'r) or (c . 'r) -> 4
-still need is-a?
+c -> #<object:complex>
+(c . 'r) -> 4
+(type c) -> #<struct> ;; complex
 
 ---
 

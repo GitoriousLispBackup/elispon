@@ -112,6 +112,12 @@
      (with ((l) . args)
        (or (null? l) (pair? l)))))
 
+(define is-a?
+  (vau args e
+       (with ((typ obj) . args)
+         (same? (eval typ e)
+                (type (eval obj e))))))
+
 ;; (define $append
 ;;   (vau args e
 ;;      (if (not (= (length args) 2))

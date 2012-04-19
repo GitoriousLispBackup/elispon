@@ -11,6 +11,7 @@
 #include "fexpr.h"
 #include "environment.h"
 #include "struct.h"
+#include "object.h"
 #include "eval.h"
 #include "primitive.h"
 
@@ -235,6 +236,24 @@ PrimitiveProc_struct (Expression *args, Environment **env, Eval *ev)
   }
 
   return Expression_new(STRUCT, structure);
+}
+
+static Expression *
+PrimitiveProc_type (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("type", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != OBJECT) {
+    Utils_error("type: expected object has argument");
+    return NULL;
+  }
+
+  return Expression_new(STRUCT, Object_type(Expression_expr(expr)));
 }
 
 /* --- */
@@ -569,6 +588,12 @@ PrimitiveProc_structp (Expression *args, Environment **env, Eval *ev)
   return PrimitiveHelper_typep("struct?", STRUCT, args, env, ev);
 }
 
+static Expression *
+PrimitiveProc_objectp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("object?", OBJECT, args, env, ev);
+}
+
 /* --- */
 
 static Expression *
@@ -627,7 +652,7 @@ PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 35
+#define PRIMITIVE_COUNT 37
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
@@ -640,6 +665,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "vau",          PrimitiveProc_vau },
   { "environment",  PrimitiveProc_environment },
   { "struct",       PrimitiveProc_struct },
+  { "type",         PrimitiveProc_type },
 
   { "cons",         PrimitiveProc_cons },
   { "car",          PrimitiveProc_car },
@@ -667,6 +693,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "fexpr?",       PrimitiveProc_fexprp },
   { "environment?", PrimitiveProc_environmentp },
   { "struct?",      PrimitiveProc_structp },
+  { "object?",      PrimitiveProc_objectp },
 
   { "%open-fexpr%", PrimitiveProc_open_fexpr },
   { "%open-struct%", PrimitiveProc_open_struct }
