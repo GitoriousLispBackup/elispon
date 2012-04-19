@@ -7,7 +7,7 @@ typedef struct Expression Expression;
 
 typedef enum {
   PRIMITIVE, NIL, PAIR, SYMBOL, CHARACTER, STRING, NUMBER,
-  FEXPR, ENVIRONMENT, STRUCT
+  FEXPR, ENVIRONMENT, STRUCT, OBJECT
 } ExprType;
 
 Expression *Expression_new (ExprType type, void *expr);
@@ -19,8 +19,6 @@ void *Expression_expr (Expression *self);
 void Expression_setExpr (Expression *self, void *expr);
 
 char *Expression_typeName (Expression *self);
-bool Expression_isNil (Expression *self);
-bool Expression_isCallable (Expression *self);
 Expression *Expression_cons (Expression *car, Expression *cdr);
 Expression *Expression_car (Expression *self);
 Expression *Expression_cdr (Expression *self);

@@ -10,6 +10,7 @@
 #include "fexpr.h"
 #include "environment.h"
 #include "struct.h"
+#include "object.h"
 #include "port.h"
 #include "printer.h"
 
@@ -145,6 +146,10 @@ Printer_printExpression (Printer *self, Expression *expr)
   case ENVIRONMENT:
   case STRUCT:
     Port_printf(self->output, "#{%s}", Expression_typeName(expr));
+    break;
+  case OBJECT:
+    Port_printf(self->output, "#{object:%s}",
+                Object_name(Expression_expr(expr)));
     break;
   default:
     Utils_error("Printer: unknown expression type");

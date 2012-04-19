@@ -11,6 +11,7 @@
 #include "fexpr.h"
 #include "environment.h"
 #include "struct.h"
+#include "object.h"
 #include "eval.h"
 
 struct Eval {
@@ -47,31 +48,104 @@ Eval_errput (Eval *self)
 /* ----- */
 
 static Expression *
-Eval_evalPair (Eval *self, Pair *pair, Environment **env)
+Eval_applyFexpr (Eval *self, Fexpr *f, Expression *args, Environment **env)
 {
-  Expression *f = NULL;
+  Environment *environment = NULL;
 
-  if ((f = Eval_eval(self, Pair_fst(pair), env)) == NULL)
-    return NULL;
-  if (!Expression_isCallable(f)) {
-    Utils_error("expected primitive or fexpr, given a %s",
-                Expression_typeName(f));
+  environment = Fexpr_lexenv(f);
+  Environment_add(environment, Fexpr_arg(f), args);
+  Environment_add(environment, Fexpr_dynenv(f),
+                  Expression_new(ENVIRONMENT, *env));
+
+  return Eval_eval(self, Fexpr_body(f), &environment);
+}
+
+static Expression *
+Eval_applyStruct (Eval *self, Struct *type, char *name, Expression *args,
+                  Environment **env)
+{
+  Expression *expr = NULL;
+  Object *obj = NULL;
+  int size, length;
+
+  obj = Object_new(type, name);
+
+  size = Struct_size(Object_type(obj));
+  length = Expression_length(args);
+
+  if (size != length) {
+    Utils_error("struct %s object creation: expected %d arguments, given %d",
+                Object_name(obj), size, length);
     return NULL;
   }
 
-  if (Expression_type(f) == PRIMITIVE)
-    return Primitive_proc(Expression_expr(f))(Pair_snd(pair), env, self);
+  while (Expression_type(args) != NIL) {
+    if (Expression_type(args) != PAIR) {
+      Utils_error("struct %s object creation: expected proper list",
+                  Object_name(obj));
+      return NULL;
+    }
 
-  if (Expression_type(f) == FEXPR) {
-    Environment *environment = NULL;
+    if ((expr = Eval_eval(self, Expression_car(args), env)) == NULL)
+      return NULL;
 
-    environment = Fexpr_lexenv(Expression_expr(f));
-    Environment_add(environment, Fexpr_arg(Expression_expr(f)),
-                    Pair_snd(pair));
-    Environment_add(environment, Fexpr_dynenv(Expression_expr(f)),
-                    Expression_new(ENVIRONMENT, *env));
+    Object_setFieldByPosition(obj, size - (length--), expr);
 
-    return Eval_eval(self, Fexpr_body(Expression_expr(f)), &environment);
+    args = Expression_cdr(args);
+  }
+
+  return Expression_new(OBJECT, obj);
+}
+
+static Expression *
+Eval_applyObject (Eval *self, Object *obj, Expression *arg, Environment **env)
+{
+  Expression *expr = NULL;
+  Symbol *field = NULL;
+
+  if ((expr = Eval_eval(self, arg, env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != SYMBOL) {
+    Utils_error("struct %s field access: expected symbol as argument",
+                Object_name(obj));
+    return NULL;
+  }
+
+  field = Expression_expr(expr);
+  if ((expr = Object_field(obj, field)) == NULL) {
+    Utils_error("struct %s has no field named %s",
+                Object_name(obj), Symbol_name(field));
+    return NULL;
+  }
+
+  return expr;
+}
+
+static Expression *
+Eval_evalPair (Eval *self, Pair *pair, Environment **env)
+{
+  Expression *expr = NULL;
+
+  if ((expr = Eval_eval(self, Pair_fst(pair), env)) == NULL)
+    return NULL;
+
+  switch (Expression_type(expr)) {
+  case PRIMITIVE:
+    return Primitive_proc(Expression_expr(expr))(Pair_snd(pair), env, self);
+  case FEXPR:
+    return Eval_applyFexpr(self, Expression_expr(expr), Pair_snd(pair), env);
+  case STRUCT:
+    return Eval_applyStruct(self, Expression_expr(expr),
+                            ((Expression_type(Pair_fst(pair)) == SYMBOL)
+                             ? Symbol_name(Expression_expr(Pair_fst(pair)))
+                             : "%anon%"),
+                            Pair_snd(pair), env);
+  case OBJECT:
+    return Eval_applyObject(self, Expression_expr(expr), Pair_snd(pair), env);
+  default:
+    Utils_error("expected callable, given a %s",
+                Expression_typeName(expr));
   }
 
   return NULL;
@@ -99,6 +173,7 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
   case FEXPR:
   case ENVIRONMENT:
   case STRUCT:
+  case OBJECT:
     return expr;
   default:
     Utils_error("Eval: unknown expression type");

@@ -9,6 +9,7 @@
 #include "fexpr.h"
 #include "environment.h"
 #include "struct.h"
+#include "object.h"
 #include "expression.h"
 
 struct Expression {
@@ -62,6 +63,10 @@ Expression_delete (Expression *self)
     break;
   case STRUCT:
     Struct_delete(self->expr);
+    break;
+  case OBJECT:
+    Object_delete(self->expr);
+    break;
   default:
     Utils_fatal("Expression_delete: unknown expression type.");
   }
@@ -123,12 +128,6 @@ Expression_typeName (Expression *self)
   default:
     return "unknown";
   }
-}
-
-bool
-Expression_isCallable (Expression *self)
-{
-  return self->type == PRIMITIVE || self->type == FEXPR;
 }
 
 Expression *
