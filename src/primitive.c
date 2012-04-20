@@ -136,27 +136,6 @@ PrimitiveProc_same (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
-PrimitiveProc_error (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *expr = NULL;
-
-  nb_args("error", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) != STRING) {
-    Utils_error("error: expected string");
-    return NULL;
-  }
-
-  Port_printf(Eval_errput(ev), "Error: %s\n",
-              String_buf(Expression_expr(expr)));
-
-  return NULL;
-}
-
-static Expression *
 PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL, *environment = NULL;
@@ -178,8 +157,6 @@ PrimitiveProc_eval (Expression *args, Environment **env, Eval *ev)
 
   return Eval_eval(ev, expr, env);
 }
-
-/* --- */
 
 static Expression *
 PrimitiveProc_vau (Expression *args, Environment **env, Eval *ev)
@@ -206,54 +183,6 @@ PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
   nb_args("environment", 0, args);
 
   return Expression_new(ENVIRONMENT, Environment_copy(*env));
-}
-
-static Expression *
-PrimitiveProc_struct (Expression *args, Environment **env, Eval *ev)
-{
-  Struct *structure = NULL;
-  Expression *member = NULL;
-  int i = 0, size;
-
-  size = Expression_length(args);
-
-  structure = Struct_new(size);
-
-  while (Expression_type(args) != NIL) {
-    if (Expression_type(args) != PAIR) {
-      Utils_error("struct: expected proper list");
-      return NULL;
-    }
-
-    if (Expression_type(member = car(args)) != SYMBOL) {
-      Utils_error("struct: members name must be symbol");
-      return NULL;
-    }
-
-    Struct_declareMember(structure, i++, Expression_expr(member));
-
-    args = cdr(args);
-  }
-
-  return Expression_new(STRUCT, structure);
-}
-
-static Expression *
-PrimitiveProc_type (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *expr = NULL;
-
-  nb_args("type", 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) != OBJECT) {
-    Utils_error("type: expected object has argument");
-    return NULL;
-  }
-
-  return Expression_new(STRUCT, Object_type(Expression_expr(expr)));
 }
 
 /* --- */
@@ -352,6 +281,163 @@ PrimitiveProc_length (Expression *args, Environment **env, Eval *ev)
     return NULL;
 
   return Expression_new(NUMBER, Number_new(Expression_length(list)));
+}
+
+/* --- */
+
+static Expression *
+PrimitiveProc_struct (Expression *args, Environment **env, Eval *ev)
+{
+  Struct *structure = NULL;
+  Expression *member = NULL;
+  int i = 0, size;
+
+  size = Expression_length(args);
+
+  structure = Struct_new(size);
+
+  while (Expression_type(args) != NIL) {
+    if (Expression_type(args) != PAIR) {
+      Utils_error("struct: expected proper list");
+      return NULL;
+    }
+
+    if (Expression_type(member = car(args)) != SYMBOL) {
+      Utils_error("struct: members name must be symbol");
+      return NULL;
+    }
+
+    Struct_declareMember(structure, i++, Expression_expr(member));
+
+    args = cdr(args);
+  }
+
+  return Expression_new(STRUCT, structure);
+}
+
+static Expression *
+PrimitiveProc_type (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("type", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != OBJECT) {
+    Utils_error("type: expected object has argument");
+    return NULL;
+  }
+
+  return Expression_new(STRUCT, Object_type(Expression_expr(expr)));
+}
+
+/* --- */
+
+static Expression *
+PrimitiveHelper_typep (char *name, ExprType type,
+                       Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args(name, 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) == type)
+    return Expression_new(SYMBOL, Primitive_true());
+  return Expression_new(NIL, NULL);
+}
+
+static Expression *
+PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("primitive?", PRIMITIVE, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("null?", NIL, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("pair?", PAIR, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("symbol?", SYMBOL, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_characterp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("character?", CHARACTER, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("string?", STRING, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("number?", NUMBER, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_fexprp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("fexpr?", FEXPR, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_environmentp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("environment?", ENVIRONMENT, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_structp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("struct?", STRUCT, args, env, ev);
+}
+
+static Expression *
+PrimitiveProc_objectp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("object?", OBJECT, args, env, ev);
+}
+
+/* --- */
+
+static Expression *
+PrimitiveProc_error (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("error", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != STRING) {
+    Utils_error("error: expected string");
+    return NULL;
+  }
+
+  Port_printf(Eval_errput(ev), "Error: %s\n",
+              String_buf(Expression_expr(expr)));
+
+  return NULL;
 }
 
 /* --- */
@@ -513,90 +599,6 @@ PrimitiveProc_greater (Expression *args, Environment **env, Eval *ev)
 /* --- */
 
 static Expression *
-PrimitiveHelper_typep (char *name, ExprType type,
-                       Expression *args, Environment **env, Eval *ev)
-{
-  Expression *expr = NULL;
-
-  nb_args(name, 1, args);
-
-  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  if (Expression_type(expr) == type)
-    return Expression_new(SYMBOL, Primitive_true());
-  return Expression_new(NIL, NULL);
-}
-
-static Expression *
-PrimitiveProc_primitivep (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("primitive?", PRIMITIVE, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_nullp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("null?", NIL, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_pairp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("pair?", PAIR, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_symbolp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("symbol?", SYMBOL, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_characterp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("character?", CHARACTER, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_stringp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("string?", STRING, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_numberp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("number?", NUMBER, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_fexprp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("fexpr?", FEXPR, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_environmentp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("environment?", ENVIRONMENT, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_structp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("struct?", STRUCT, args, env, ev);
-}
-
-static Expression *
-PrimitiveProc_objectp (Expression *args, Environment **env, Eval *ev)
-{
-  return PrimitiveHelper_typep("object?", OBJECT, args, env, ev);
-}
-
-/* --- */
-
-static Expression *
 PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
@@ -659,13 +661,9 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "sequence",     PrimitiveProc_sequence },
   { "if",           PrimitiveProc_if },
   { "same?",        PrimitiveProc_same },
-  { "error",        PrimitiveProc_error },
   { "eval",         PrimitiveProc_eval },
-
   { "vau",          PrimitiveProc_vau },
   { "environment",  PrimitiveProc_environment },
-  { "struct",       PrimitiveProc_struct },
-  { "type",         PrimitiveProc_type },
 
   { "cons",         PrimitiveProc_cons },
   { "car",          PrimitiveProc_car },
@@ -673,15 +671,8 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "list",         PrimitiveProc_list },
   { "length",       PrimitiveProc_length },
 
-  { "+",            PrimitiveProc_add },
-  { "-",            PrimitiveProc_sub },
-  { "*",            PrimitiveProc_mul },
-  { "/",            PrimitiveProc_div },
-  { "div",          PrimitiveProc_idiv },
-  { "mod",          PrimitiveProc_mod },
-  { "=",            PrimitiveProc_equal },
-  { "<",            PrimitiveProc_lesser },
-  { ">",            PrimitiveProc_greater },
+  { "struct",       PrimitiveProc_struct },
+  { "type",         PrimitiveProc_type },
 
   { "null?",        PrimitiveProc_nullp },
   { "primitive?",   PrimitiveProc_primitivep },
@@ -694,6 +685,18 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "environment?", PrimitiveProc_environmentp },
   { "struct?",      PrimitiveProc_structp },
   { "object?",      PrimitiveProc_objectp },
+
+  { "error",        PrimitiveProc_error },
+
+  { "+",            PrimitiveProc_add },
+  { "-",            PrimitiveProc_sub },
+  { "*",            PrimitiveProc_mul },
+  { "/",            PrimitiveProc_div },
+  { "div",          PrimitiveProc_idiv },
+  { "mod",          PrimitiveProc_mod },
+  { "=",            PrimitiveProc_equal },
+  { "<",            PrimitiveProc_lesser },
+  { ">",            PrimitiveProc_greater },
 
   { "%open-fexpr%", PrimitiveProc_open_fexpr },
   { "%open-struct%", PrimitiveProc_open_struct }
