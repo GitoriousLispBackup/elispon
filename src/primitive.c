@@ -472,6 +472,27 @@ PrimitiveHelper_arith (char *name, Number *(*op)(Number *, Number*),
 }
 
 static Expression *
+PrimitiveHelper_arith0 (char *name, Number *(*op)(Number *, Number*),
+                        Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  if (Expression_length(args) < 2)
+    return PrimitiveHelper_arith(name, op, args, env, ev, Number_new(0));
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != NUMBER) {
+    Utils_error("%s: expected number", name);
+    return NULL;
+  }
+
+  return PrimitiveHelper_arith(name, op, cdr(args), env, ev,
+                               Expression_expr(expr));
+}
+
+static Expression *
 PrimitiveHelper_arith1 (char *name, Number *(*op)(Number *, Number*),
                         Expression *args, Environment **env, Eval *ev)
 {
@@ -503,7 +524,7 @@ PrimitiveProc_add (Expression *args, Environment **env, Eval *ev)
 static Expression *
 PrimitiveProc_sub (Expression *args, Environment **env, Eval *ev)
 {
-  return PrimitiveHelper_arith("-", Number_sub, args, env, ev, Number_new(0));
+  return PrimitiveHelper_arith0("-", Number_sub, args, env, ev);
 }
 
 static Expression *

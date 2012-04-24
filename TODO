@@ -5,12 +5,7 @@ Printer should check this flag to print accordingly.
 
 ---
 
-(define complex (struct r i)) -> complex
-complex -> #<struct>
-(define c (complex 4 2)) -> c
-c -> #<object:complex>
-(c . 'r) -> 4
-(type c) -> #<struct> ;; complex
+I/O
 
 ---
 
