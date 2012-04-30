@@ -456,12 +456,12 @@ PrimitiveProc_objectp (Expression *args, Environment **env, Eval *ev)
 /* --- */
 
 static Expression *
-PrimitiveProc_print (Expression *args, Environment **env, Eval *ev)
+PrimitiveProc_write (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
   Printer *printer = NULL;
 
-  nb_args("print", 1, args);
+  nb_args("write", 1, args);
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
@@ -475,17 +475,17 @@ PrimitiveProc_print (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
-PrimitiveProc_display (Expression *args, Environment **env, Eval *ev)
+PrimitiveProc_print (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
 
-  nb_args("display", 1, args);
+  nb_args("print", 1, args);
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
 
   if (Expression_type(expr) != STRING) {
-    Utils_error("display: expected string");
+    Utils_error("print: expected string");
     return NULL;
   }
 
@@ -784,8 +784,8 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "struct?",      PrimitiveProc_structp },
   { "object?",      PrimitiveProc_objectp },
 
+  { "write",        PrimitiveProc_write },
   { "print",        PrimitiveProc_print },
-  { "display",      PrimitiveProc_display },
   { "error",        PrimitiveProc_error },
 
   { "+",            PrimitiveProc_add },

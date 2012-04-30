@@ -5,7 +5,8 @@ Printer should check this flag to print accordingly.
 
 ---
 
-I/O
+I/O: when port manipulation primitive, have an additional parameter to specify
+   which port to use.
 
 ---
 
