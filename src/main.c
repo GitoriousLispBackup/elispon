@@ -13,7 +13,7 @@ int
 main (int argc, char *argv[])
 {
   FILE *stdlib = NULL;
-  Port *input = NULL, *output = NULL, *errput = NULL;
+  Port *libin = NULL, *input = NULL, *output = NULL, *errput = NULL;
   Parser *parser = NULL;
   Expression *expr = NULL;
   Environment *env = NULL;
@@ -23,18 +23,19 @@ main (int argc, char *argv[])
 
   parser = Parser_new(NULL, Primitive_initialSymbols());
   env = Environment_new(Primitive_initialEnvironment());
+  input = Port_newFile(stdin, "stdin");
   output = Port_newFile(stdout, "stdout");
   printer = Printer_new(output);
   errput = Port_newFile(stderr, "stderr");
-  eval = Eval_new(errput);
+  eval = Eval_new(input, output, errput);
 
   if (argc == 2) {
     stdlib = Utils_openFile(argv[1], "r");
-    input = Port_newFile(stdlib, "stdlib");
-    Parser_reset(parser, input);
+    libin = Port_newFile(stdlib, argv[1]);
+    Parser_reset(parser, libin);
     while ((expr = Parser_parseExpression(parser)) != NULL)
       Eval_eval(eval, expr, &env);
-    Port_delete(input);
+    Port_delete(libin);
     Utils_closeFile(stdlib);
   }
 

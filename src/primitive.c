@@ -13,6 +13,7 @@
 #include "struct.h"
 #include "object.h"
 #include "eval.h"
+#include "printer.h"
 #include "primitive.h"
 
 struct Primitive {
@@ -455,6 +456,46 @@ PrimitiveProc_objectp (Expression *args, Environment **env, Eval *ev)
 /* --- */
 
 static Expression *
+PrimitiveProc_print (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+  Printer *printer = NULL;
+
+  nb_args("print", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  printer = Printer_new(Eval_output(ev));
+  Printer_printExpression(printer, expr);
+  Printer_delete(printer);
+  Port_printf(Eval_output(ev), "\n");
+
+  return Expression_new(NIL, NULL);
+}
+
+static Expression *
+PrimitiveProc_display (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("display", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != STRING) {
+    Utils_error("display: expected string");
+    return NULL;
+  }
+
+  Port_printf(Eval_output(ev), "%s",
+              String_buf(Expression_expr(expr)));
+
+  return Expression_new(NIL, NULL);
+}
+
+static Expression *
 PrimitiveProc_error (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
@@ -710,7 +751,7 @@ PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 37
+#define PRIMITIVE_COUNT 40
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
@@ -743,6 +784,8 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "struct?",      PrimitiveProc_structp },
   { "object?",      PrimitiveProc_objectp },
 
+  { "print",        PrimitiveProc_print },
+  { "display",      PrimitiveProc_display },
   { "error",        PrimitiveProc_error },
 
   { "+",            PrimitiveProc_add },

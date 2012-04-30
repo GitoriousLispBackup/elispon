@@ -15,16 +15,18 @@
 #include "eval.h"
 
 struct Eval {
-  Port *errput;
+  Port *input, *output, *errput;
 };
 
 Eval *
-Eval_new (Port *errput)
+Eval_new (Port *input, Port *output, Port *errput)
 {
   Eval *self = NULL;
 
   alloc_one(self);
 
+  self->input = input;
+  self->output = output;
   self->errput = errput;
 
   return self;
@@ -38,6 +40,18 @@ Eval_delete (Eval *self)
 }
 
 /* ----- */
+
+Port *
+Eval_input (Eval *self)
+{
+  return self->input;
+}
+
+Port *
+Eval_output (Eval *self)
+{
+  return self->output;
+}
 
 Port *
 Eval_errput (Eval *self)
