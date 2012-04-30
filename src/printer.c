@@ -60,7 +60,7 @@ Printer_printInfiniteList (Printer *self, Pair *pair, Pair *start)
     Port_printf(self->output, "…]");
     return;
   }
-  else Printer_printExpression(self, Pair_fst(pair));
+  else Printer_print(self, Pair_fst(pair));
   Port_printf(self->output, " ");
   Printer_printInfiniteList(self, Expression_expr(Pair_snd(pair)), start);
   Pair_setFlag(pair, false);
@@ -76,7 +76,7 @@ Printer_printPair (Printer *self, Pair *pair)
   }
 
   Pair_setFlag(pair, true);
-  Printer_printExpression(self, Pair_fst(pair));
+  Printer_print(self, Pair_fst(pair));
 
   if (Expression_type(Pair_snd(pair)) == PAIR) {
     Port_printf(self->output, " ");
@@ -84,7 +84,7 @@ Printer_printPair (Printer *self, Pair *pair)
   }
   else if (Expression_type(Pair_snd(pair)) != NIL) {
     Port_printf(self->output, " . ");
-    Printer_printExpression(self, Pair_snd(pair));
+    Printer_print(self, Pair_snd(pair));
   }
   Pair_setFlag(pair, false);
 }
@@ -114,8 +114,10 @@ Printer_printCharacter (Printer *self, Character *c)
   }
 }
 
+/* ----- */
+
 void
-Printer_printExpression (Printer *self, Expression *expr)
+Printer_print (Printer *self, Expression *expr)
 {
   switch (Expression_type(expr)) {
   case PRIMITIVE:

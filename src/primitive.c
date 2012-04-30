@@ -467,7 +467,7 @@ PrimitiveProc_print (Expression *args, Environment **env, Eval *ev)
     return NULL;
 
   printer = Printer_new(Eval_output(ev));
-  Printer_printExpression(printer, expr);
+  Printer_print(printer, expr);
   Printer_delete(printer);
   Port_printf(Eval_output(ev), "\n");
 

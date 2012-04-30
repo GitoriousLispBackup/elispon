@@ -120,7 +120,7 @@ REPL_print (REPL *self)
   if (self == NULL) return NULL;
 
   if (self->expr != NULL)
-    Printer_printExpression(self->printer, self->expr);
+    Printer_print(self->printer, self->expr);
 
   return self;
 }

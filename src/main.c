@@ -33,7 +33,7 @@ main (int argc, char *argv[])
     stdlib = Utils_openFile(argv[1], "r");
     libin = Port_newFile(stdlib, argv[1]);
     Parser_reset(parser, libin);
-    while ((expr = Parser_parseExpression(parser)) != NULL)
+    while ((expr = Parser_parse(parser)) != NULL)
       Eval_eval(eval, expr, &env);
     Port_delete(libin);
     Utils_closeFile(stdlib);

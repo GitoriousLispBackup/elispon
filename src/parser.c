@@ -72,14 +72,14 @@ Parser_parsePair (Parser *self)
   }
 
   Lexer_stepback(self->lexer);
-  car = Parser_parseExpression(self);
+  car = Parser_parse(self);
 
   if (Lexer_step(self->lexer) == TDot) {
     if (Lexer_step(self->lexer) == TClosingParen)
       return Parser_error(self, "expected expression");
     else Lexer_stepback(self->lexer);
 
-    cdr = Parser_parseExpression(self);
+    cdr = Parser_parse(self);
 
     if (Lexer_step(self->lexer) != TClosingParen)
       return Parser_error(self, "expected closing parenthesis");
@@ -94,7 +94,7 @@ Parser_parsePair (Parser *self)
 }
 
 Expression *
-Parser_parseExpression (Parser *self)
+Parser_parse (Parser *self)
 {
   Expression *expr = NULL;
 
@@ -149,7 +149,7 @@ Parser_parseExpression (Parser *self)
 Expression *
 Parser_parseOneExpression (Parser *self)
 {
-  Expression *expr = Parser_parseExpression(self);
+  Expression *expr = Parser_parse(self);
 
   if (Lexer_step(self->lexer) != TEnd)
     return Parser_error(self, "expected EOF");

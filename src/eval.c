@@ -165,8 +165,10 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
   return NULL;
 }
 
-static Expression *
-Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
+/* ----- */
+
+Expression *
+Eval_eval (Eval *self, Expression *expr, Environment **env)
 {
   switch (Expression_type(expr)) {
   case PAIR:
@@ -194,12 +196,4 @@ Eval_evalExpression (Eval *self, Expression *expr, Environment **env)
   }
 
   return NULL;
-}
-
-/* ----- */
-
-Expression *
-Eval_eval (Eval *self, Expression *expr, Environment **env)
-{
-  return Eval_evalExpression(self, expr, env);
 }
