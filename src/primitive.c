@@ -71,6 +71,41 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
     return NULL;
   }
 
+  if (Environment_find(*env, Expression_expr(car(args))) != NULL) {
+    Utils_error("define: %s: already defined symbol",
+                Symbol_name(Expression_expr(car(args))));
+    return NULL;
+  }
+
+  tmp = Expression_new(NIL, NULL);
+  Environment_add(*env, Expression_expr(car(args)), tmp);
+
+  if ((expr = Eval_eval(ev, cadr(args), env)) == NULL)
+    return NULL;
+
+  Expression_setType(tmp, Expression_type(expr));
+  Expression_setExpr(tmp, Expression_expr(expr));
+
+  return car(args);
+}
+
+static Expression *
+PrimitiveProc_set (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL, *tmp = NULL;
+
+  nb_args("set", 2, args);
+  if (Expression_type(car(args)) != SYMBOL) {
+    Utils_error("set: expected symbol as first argument");
+    return NULL;
+  }
+
+  if (Environment_find(*env, Expression_expr(car(args))) == NULL) {
+    Utils_error("set: %s: inexistant symbol",
+                Symbol_name(Expression_expr(car(args))));
+    return NULL;
+  }
+
   tmp = Expression_new(NIL, NULL);
   Environment_add(*env, Expression_expr(car(args)), tmp);
 
@@ -679,6 +714,7 @@ PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
+  { "set",          PrimitiveProc_set },
   { "sequence",     PrimitiveProc_sequence },
   { "if",           PrimitiveProc_if },
   { "same?",        PrimitiveProc_same },

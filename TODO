@@ -9,10 +9,6 @@ I/O
 
 ---
 
-define should refuse binding a symbol already present in local environment
-
----
-
 (with bindings
   ...)
 
