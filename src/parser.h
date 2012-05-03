@@ -3,10 +3,11 @@
 
 #include "port.h"
 #include "expression.h"
+#include "symbol-table.h"
 
 typedef struct Parser Parser;
 
-Parser *Parser_new (Port *input, Expression *symbols);
+Parser *Parser_new (Port *input, SymbolTable *symbols);
 void Parser_delete (Parser *self);
 void Parser_reset (Parser *self, Port *input);
 

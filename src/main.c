@@ -6,6 +6,7 @@
 #include "expression.h"
 #include "primitive.h"
 #include "eval.h"
+#include "symbol-table.h"
 #include "environment.h"
 #include "repl.h"
 
@@ -16,18 +17,20 @@ main (int argc, char *argv[])
   Port *libin = NULL, *input = NULL, *output = NULL, *errput = NULL;
   Parser *parser = NULL;
   Expression *expr = NULL;
+  SymbolTable *symbols = NULL;
   Environment *env = NULL;
   Printer *printer = NULL;
   Eval *eval = NULL;
   REPL *repl = NULL;
 
-  parser = Parser_new(NULL, Primitive_initialSymbols());
-  env = Environment_new(Primitive_initialEnvironment());
+  symbols = SymbolTable_new(Primitive_initialSymbols());
+  parser = Parser_new(NULL, symbols);
+  env = Environment_new(Primitive_initialEnvironment(symbols));
   input = Port_newFile(stdin, "stdin");
   output = Port_newFile(stdout, "stdout");
   printer = Printer_new(output);
   errput = Port_newFile(stderr, "stderr");
-  eval = Eval_new(input, output, errput);
+  eval = Eval_new(input, output, errput, symbols);
 
   if (argc == 2) {
     stdlib = Utils_openFile(argv[1], "r");

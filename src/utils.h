@@ -5,13 +5,11 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include "expression.h"
-#include "symbol.h"
 
 #define alloc_one(ptr) alloc_(ptr, 1)
 
 #define alloc_(ptr, size)                               \
-  (((ptr = malloc(size * sizeof(*(ptr)))) == NULL)      \
+  (((ptr = calloc(size, sizeof(*(ptr)))) == NULL)       \
    ? (Utils_fatal("malloc: %s", strerror(errno)), NULL) \
    : ptr)
 
@@ -30,7 +28,5 @@ void Utils_closeFile (FILE *f);
 
 void Utils_error (const char *format, ...);
 void Utils_fatal (const char *format, ...);
-
-Symbol *Utils_findSymbol (Expression *symbols, char *name);
 
 #endif /* UTILS_H__ */

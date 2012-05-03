@@ -12,16 +12,18 @@
 #include "environment.h"
 #include "struct.h"
 #include "object.h"
+#include "parser.h"
 #include "printer.h"
 #include "eval.h"
 
 struct Eval {
   Port *input, *output, *errput;
+  Parser *parser;
   Printer *printer;
 };
 
 Eval *
-Eval_new (Port *input, Port *output, Port *errput)
+Eval_new (Port *input, Port *output, Port *errput, SymbolTable *symbols)
 {
   Eval *self = NULL;
 
@@ -30,6 +32,7 @@ Eval_new (Port *input, Port *output, Port *errput)
   self->input = input;
   self->output = output;
   self->errput = errput;
+  self->parser = Parser_new(input, symbols);
   self->printer = Printer_new(output);
 
   return self;
@@ -62,6 +65,12 @@ Eval_errput (Eval *self)
   return self->errput;
 }
 
+Parser *
+Eval_parser (Eval *self)
+{
+  return self->parser;
+}
+
 Printer *
 Eval_printer (Eval *self)
 {
@@ -84,7 +93,7 @@ Eval_applyFexpr (Eval *self, Fexpr *f, Expression *args, Environment **env)
 }
 
 static Expression *
-Eval_applyStruct (Eval *self, Struct *type, char *name, Expression *args,
+Eval_applyStruct (Eval *self, Struct *type, const char *name, Expression *args,
                   Environment **env)
 {
   Expression *expr = NULL;

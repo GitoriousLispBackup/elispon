@@ -514,6 +514,14 @@ PrimitiveProc_error (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
+PrimitiveProc_read (Expression *args, Environment **env, Eval *ev)
+{
+  nb_args("read", 0, args);
+
+  return Parser_parseOneExpression(Eval_parser(ev));
+}
+
+static Expression *
 PrimitiveProc_scan (Expression *args, Environment **env, Eval *ev)
 {
   nb_args("scan", 0, args);
@@ -756,55 +764,54 @@ PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 41
-
 Primitive prim_[PRIMITIVE_COUNT] = {
-  { "define",       PrimitiveProc_define },
-  { "set",          PrimitiveProc_set },
-  { "sequence",     PrimitiveProc_sequence },
-  { "if",           PrimitiveProc_if },
-  { "same?",        PrimitiveProc_same },
-  { "eval",         PrimitiveProc_eval },
-  { "vau",          PrimitiveProc_vau },
-  { "environment",  PrimitiveProc_environment },
+  { "define",        PrimitiveProc_define },
+  { "set",           PrimitiveProc_set },
+  { "sequence",      PrimitiveProc_sequence },
+  { "if",            PrimitiveProc_if },
+  { "same?",         PrimitiveProc_same },
+  { "eval",          PrimitiveProc_eval },
+  { "vau",           PrimitiveProc_vau },
+  { "environment",   PrimitiveProc_environment },
 
-  { "cons",         PrimitiveProc_cons },
-  { "car",          PrimitiveProc_car },
-  { "cdr",          PrimitiveProc_cdr },
-  { "list",         PrimitiveProc_list },
-  { "length",       PrimitiveProc_length },
+  { "cons",          PrimitiveProc_cons },
+  { "car",           PrimitiveProc_car },
+  { "cdr",           PrimitiveProc_cdr },
+  { "list",          PrimitiveProc_list },
+  { "length",        PrimitiveProc_length },
 
-  { "struct",       PrimitiveProc_struct },
-  { "type",         PrimitiveProc_type },
+  { "struct",        PrimitiveProc_struct },
+  { "type",          PrimitiveProc_type },
 
-  { "null?",        PrimitiveProc_nullp },
-  { "primitive?",   PrimitiveProc_primitivep },
-  { "pair?",        PrimitiveProc_pairp },
-  { "symbol?",      PrimitiveProc_symbolp },
-  { "character?",   PrimitiveProc_characterp },
-  { "string?",      PrimitiveProc_stringp },
-  { "number?",      PrimitiveProc_numberp },
-  { "fexpr?",       PrimitiveProc_fexprp },
-  { "environment?", PrimitiveProc_environmentp },
-  { "struct?",      PrimitiveProc_structp },
-  { "object?",      PrimitiveProc_objectp },
+  { "null?",         PrimitiveProc_nullp },
+  { "primitive?",    PrimitiveProc_primitivep },
+  { "pair?",         PrimitiveProc_pairp },
+  { "symbol?",       PrimitiveProc_symbolp },
+  { "character?",    PrimitiveProc_characterp },
+  { "string?",       PrimitiveProc_stringp },
+  { "number?",       PrimitiveProc_numberp },
+  { "fexpr?",        PrimitiveProc_fexprp },
+  { "environment?",  PrimitiveProc_environmentp },
+  { "struct?",       PrimitiveProc_structp },
+  { "object?",       PrimitiveProc_objectp },
 
-  { "write",        PrimitiveProc_write },
-  { "print",        PrimitiveProc_print },
-  { "error",        PrimitiveProc_error },
-  { "scan",         PrimitiveProc_scan },
+  { "write",         PrimitiveProc_write },
+  { "print",         PrimitiveProc_print },
+  { "error",         PrimitiveProc_error },
+  { "read",          PrimitiveProc_read },
+  { "scan",          PrimitiveProc_scan },
 
-  { "+",            PrimitiveProc_add },
-  { "-",            PrimitiveProc_sub },
-  { "*",            PrimitiveProc_mul },
-  { "/",            PrimitiveProc_div },
-  { "div",          PrimitiveProc_idiv },
-  { "mod",          PrimitiveProc_mod },
-  { "=",            PrimitiveProc_equal },
-  { "<",            PrimitiveProc_lesser },
-  { ">",            PrimitiveProc_greater },
+  { "+",             PrimitiveProc_add },
+  { "-",             PrimitiveProc_sub },
+  { "*",             PrimitiveProc_mul },
+  { "/",             PrimitiveProc_div },
+  { "div",           PrimitiveProc_idiv },
+  { "mod",           PrimitiveProc_mod },
+  { "=",             PrimitiveProc_equal },
+  { "<",             PrimitiveProc_lesser },
+  { ">",             PrimitiveProc_greater },
 
-  { "%open-fexpr%", PrimitiveProc_open_fexpr },
+  { "%open-fexpr%",  PrimitiveProc_open_fexpr },
   { "%open-struct%", PrimitiveProc_open_struct }
 };
 
@@ -819,32 +826,27 @@ Primitive_true ()
   return t;
 }
 
-Expression *
+char **
 Primitive_initialSymbols ()
 {
-  static Expression *symbols = NULL;
+  static char **symbols = NULL;
   int i;
 
   if (symbols != NULL)
     return symbols;
 
-  symbols = Expression_new(NIL, NULL);
-  for (i = 0; i < PRIMITIVE_COUNT; i++) {
-    symbols = Expression_cons(Expression_new(SYMBOL,
-                                             Symbol_new(prim_[i].name)),
-                              symbols);
-  }
-  symbols = Expression_cons(Expression_new(SYMBOL, Primitive_true()),
-                            symbols);
+  alloc_(symbols, PRIMITIVE_COUNT);
+
+  for (i = 0; i < PRIMITIVE_COUNT; i++)
+    symbols[i] = prim_[i].name;
 
   return symbols;
 }
 
 Environment *
-Primitive_initialEnvironment ()
+Primitive_initialEnvironment (SymbolTable *symbols)
 {
   static Environment *env = NULL;
-  Expression *symbols = NULL;
   Symbol *t = NULL;
   int i;
 
@@ -852,11 +854,9 @@ Primitive_initialEnvironment ()
     return env;
 
   env = Environment_new(NULL);
-  symbols = Primitive_initialSymbols();
-  for (i = 0; i < PRIMITIVE_COUNT; i++) {
-    Environment_add(env, Utils_findSymbol(symbols, prim_[i].name),
+  for (i = 0; i < PRIMITIVE_COUNT; i++)
+    Environment_add(env, SymbolTable_find(symbols, prim_[i].name),
                     Expression_new(PRIMITIVE, &prim_[i]));
-  }
   t = Primitive_true();
   Environment_add(env, t, Expression_new(SYMBOL, t));
 

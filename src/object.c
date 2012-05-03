@@ -12,7 +12,7 @@ struct Object {
 };
 
 Object *
-Object_new (Struct *type, char name[SYMBOL_NAME_MAX_SIZE])
+Object_new (Struct *type, const char name[SYMBOL_NAME_MAX_SIZE])
 {
   Object *self = NULL;
 

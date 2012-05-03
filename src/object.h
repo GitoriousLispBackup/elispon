@@ -8,7 +8,7 @@
 
 typedef struct Object Object;
 
-Object *Object_new (Struct *type, char name[SYMBOL_NAME_MAX_SIZE]);
+Object *Object_new (Struct *type, const char name[SYMBOL_NAME_MAX_SIZE]);
 void Object_delete (Object *self);
 
 char *Object_name (Object *self);

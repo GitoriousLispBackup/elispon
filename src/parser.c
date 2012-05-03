@@ -9,17 +9,18 @@
 #include "number.h"
 #include "primitive.h"
 #include "lexer.h"
+#include "symbol-table.h"
 #include "parser.h"
 
 struct Parser {
   Lexer *lexer;
-  Expression *symbols;
+  SymbolTable *symbols;
   int depth;
   bool error;
 };
 
 Parser *
-Parser_new (Port *input, Expression *symbols)
+Parser_new (Port *input, SymbolTable *symbols)
 {
   Parser *self = NULL;
 
@@ -112,14 +113,9 @@ Parser_parse (Parser *self)
     return Parser_error(self, ". used out of context");
     break;
   case TSymbol:
-    {
-      Symbol *sym = Utils_findSymbol(self->symbols, Lexer_token(self->lexer));
-      if (sym == NULL) {
-        expr = Expression_new(SYMBOL, Symbol_new(Lexer_token(self->lexer)));
-        self->symbols = Expression_cons(expr, self->symbols);
-      }
-      else expr = Expression_new(SYMBOL, sym);
-    }
+    expr = Expression_new(SYMBOL,
+                          SymbolTable_find(self->symbols,
+                                           Lexer_token(self->lexer)));
     break;
   case TCharacter:
     expr = Expression_new(CHARACTER, Character_new(*Lexer_token(self->lexer)));

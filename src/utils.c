@@ -46,20 +46,3 @@ Utils_fatal (const char *format, ...)
 
   exit(EXIT_FAILURE);
 }
-
-/* ----- */
-
-Symbol *
-Utils_findSymbol (Expression *symbols, char *name)
-{
-  Symbol *sym = NULL;
-
-  while (Expression_type(symbols) != NIL) {
-    sym = Expression_expr(Expression_car(symbols));
-    if (strcmp(name, Symbol_name(sym)) == 0)
-      return sym;
-    symbols = Expression_cdr(symbols);
-  }
-
-  return NULL;
-}

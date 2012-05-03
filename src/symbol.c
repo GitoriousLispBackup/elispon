@@ -7,7 +7,7 @@ struct Symbol {
 };
 
 Symbol *
-Symbol_new (char name[SYMBOL_NAME_MAX_SIZE])
+Symbol_new (const char name[SYMBOL_NAME_MAX_SIZE])
 {
   Symbol *self = NULL;
 
@@ -27,7 +27,7 @@ Symbol_delete (Symbol *self)
 
 /* ----- */
 
-char *
+const char *
 Symbol_name (Symbol *self)
 {
   return self->name;
