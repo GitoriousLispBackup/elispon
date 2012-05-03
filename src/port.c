@@ -135,3 +135,21 @@ Port_printf (Port *self, const char *format, ...)
 
   return 0;
 }
+
+#define BUFFER_MAX_SIZE 2048
+
+char *
+Port_readline (Port *self)
+{
+  char c, *tmp = NULL, *s = NULL;
+
+  alloc_(s, BUFFER_MAX_SIZE);
+
+  tmp = s;
+
+  while (tmp - s < BUFFER_MAX_SIZE &&
+         (c = Port_getc(self)) != EOF && c != '\n')
+    *tmp++ = c;
+
+  return s;
+}

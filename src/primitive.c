@@ -459,16 +459,13 @@ static Expression *
 PrimitiveProc_write (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
-  Printer *printer = NULL;
 
   nb_args("write", 1, args);
 
   if ((expr = Eval_eval(ev, car(args), env)) == NULL)
     return NULL;
 
-  printer = Printer_new(Eval_output(ev));
-  Printer_print(printer, expr);
-  Printer_delete(printer);
+  Printer_print(Eval_printer(ev), expr);
   Port_printf(Eval_output(ev), "\n");
 
   return Expression_new(NIL, NULL);
@@ -514,6 +511,14 @@ PrimitiveProc_error (Expression *args, Environment **env, Eval *ev)
               String_buf(Expression_expr(expr)));
 
   return NULL;
+}
+
+static Expression *
+PrimitiveProc_scan (Expression *args, Environment **env, Eval *ev)
+{
+  nb_args("scan", 0, args);
+
+  return Expression_new(STRING, String_new(Port_readline(Eval_input(ev))));
 }
 
 /* --- */
@@ -751,7 +756,7 @@ PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
 
 /* ----- */
 
-#define PRIMITIVE_COUNT 40
+#define PRIMITIVE_COUNT 41
 
 Primitive prim_[PRIMITIVE_COUNT] = {
   { "define",       PrimitiveProc_define },
@@ -787,6 +792,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "write",        PrimitiveProc_write },
   { "print",        PrimitiveProc_print },
   { "error",        PrimitiveProc_error },
+  { "scan",         PrimitiveProc_scan },
 
   { "+",            PrimitiveProc_add },
   { "-",            PrimitiveProc_sub },

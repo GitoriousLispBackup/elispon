@@ -12,10 +12,12 @@
 #include "environment.h"
 #include "struct.h"
 #include "object.h"
+#include "printer.h"
 #include "eval.h"
 
 struct Eval {
   Port *input, *output, *errput;
+  Printer *printer;
 };
 
 Eval *
@@ -28,6 +30,7 @@ Eval_new (Port *input, Port *output, Port *errput)
   self->input = input;
   self->output = output;
   self->errput = errput;
+  self->printer = Printer_new(output);
 
   return self;
 }
@@ -57,6 +60,12 @@ Port *
 Eval_errput (Eval *self)
 {
   return self->errput;
+}
+
+Printer *
+Eval_printer (Eval *self)
+{
+  return self->printer;
 }
 
 /* ----- */

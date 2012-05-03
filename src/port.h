@@ -16,5 +16,6 @@ char *Port_name (Port *self);
 int Port_getc (Port *self);
 int Port_ungetc (Port *self, int c);
 int Port_printf (Port *self, const char *format, ...);
+char *Port_readline (Port *self);
 
 #endif /* PORT_H__ */

@@ -5,8 +5,11 @@ Printer should check this flag to print accordingly.
 
 ---
 
-I/O: when port manipulation primitive, have an additional parameter to specify
-   which port to use.
+input primitives: need to rearchitecture stuff a bit to have access to the
+   symbols table, surely a parser/lexer and a printer in Eval.
+
+when port manipulation primitive, have an additional parameter to specify which
+   port to use.
 
 ---
 
