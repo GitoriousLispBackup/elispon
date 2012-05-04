@@ -727,10 +727,10 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 
   f = Expression_expr(expr);
 
-  return cons(Expression_new(SYMBOL, Fexpr_arg(f)),
-              cons(Expression_new(SYMBOL, Fexpr_dynenv(f)),
-                   cons(Fexpr_body(f), Expression_new(ENVIRONMENT,
-                                                      Fexpr_lexenv(f)))));
+  return cons(cons(Expression_new(SYMBOL, Fexpr_arg(f)),
+                   cons(Expression_new(SYMBOL, Fexpr_dynenv(f)),
+                        cons(Fexpr_body(f), Expression_new(NIL, NULL)))),
+              Expression_new(ENVIRONMENT, Fexpr_lexenv(f)));
 }
 
 static Expression *
