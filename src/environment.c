@@ -91,6 +91,13 @@ Environment_add (Environment *self, Symbol *sym, Expression *expr)
 }
 
 void
+Environment_pop (Environment *self)
+{
+  self->assoc = Expression_cdr(self->assoc);
+}
+
+/*
+void
 Environment_set (Environment *self, Symbol *sym, Expression *expr)
 {
   Expression *assoc = self->assoc;
@@ -106,6 +113,6 @@ Environment_set (Environment *self, Symbol *sym, Expression *expr)
   } while ((self = self->parent) != NULL &&
            (assoc = self->assoc));
 }
-
+*/
 #undef caar
 #undef cdar

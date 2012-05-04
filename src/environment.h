@@ -13,6 +13,6 @@ Environment *Environment_copy (Environment *self);
 Expression *Environment_find (Environment *self, Symbol *sym);
 Symbol *Environment_reverseFind (Environment *self, Expression *expr);
 void Environment_add (Environment *self, Symbol *sym, Expression *expr);
-void Environment_set (Environment *self, Symbol *sym, Expression *expr);
+void Environment_pop (Environment *self);
 
 #endif /* ENVIRONMENT_H__ */

@@ -82,8 +82,10 @@ PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
   tmp = Expression_new(NIL, NULL);
   Environment_add(*env, Expression_expr(car(args)), tmp);
 
-  if ((expr = Eval_eval(ev, cadr(args), env)) == NULL)
+  if ((expr = Eval_eval(ev, cadr(args), env)) == NULL) {
+    Environment_pop(*env);
     return NULL;
+  }
 
   Expression_setType(tmp, Expression_type(expr));
   Expression_setExpr(tmp, Expression_expr(expr));
