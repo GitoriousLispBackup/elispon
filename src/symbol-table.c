@@ -49,7 +49,7 @@ SymbolTable_find (SymbolTable *self, const char *name)
 
   if (self->count >= self->size - 1) {
     self->size *= 2;
-    self->table = realloc(self->table, self->size * sizeof(*(self->table)));
+    self->table = realloc_(self->table, self->size);
   }
 
   self->table[self->count] = Symbol_new(name);

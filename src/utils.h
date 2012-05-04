@@ -10,7 +10,12 @@
 
 #define alloc_(ptr, size)                               \
   (((ptr = calloc(size, sizeof(*(ptr)))) == NULL)       \
-   ? (Utils_fatal("malloc: %s", strerror(errno)), NULL) \
+   ? (Utils_fatal("calloc: %s", strerror(errno)), NULL) \
+   : ptr)
+
+#define realloc_(ptr, size)                              \
+  (((ptr = realloc(ptr, size * sizeof(*(ptr)))) == NULL) \
+   ? (Utils_fatal("realloc: %s", strerror(errno)), NULL) \
    : ptr)
 
 #define free_(ptr) (free(ptr), ptr = NULL)
