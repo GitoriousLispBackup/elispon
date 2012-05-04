@@ -1,7 +1,7 @@
 (εlispon) version 0
 
-(εlispon) is a Common Lisp, Scheme and Kernel inspired Lisp.
-
-It is not intended for "real" use, it is just a pet project.
+(εlispon) is a programming language of the Lisp family which is highly
+influenced by Kernel and Scheme. It is not intented for "real" use, it is and
+will stay a pet project.
 
 The code is licensed under AGPLv3.

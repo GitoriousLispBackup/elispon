@@ -60,6 +60,7 @@ Primitive_proc (Primitive *self)
 #define cdr(e)  (Expression_cdr(e))
 #define cadr(e) (Expression_car(Expression_cdr(e)))
 #define caddr(e) (Expression_car(Expression_cdr(Expression_cdr(e))))
+#define cons(a,b) (Expression_cons(a, b))
 
 static Expression *
 PrimitiveProc_define (Expression *args, Environment **env, Eval *ev)
@@ -235,7 +236,7 @@ PrimitiveProc_cons (Expression *args, Environment **env, Eval *ev)
   if ((snd = Eval_eval(ev, cadr(args), env)) == NULL)
     return NULL;
 
-  return Expression_cons(fst, snd);
+  return cons(fst, snd);
 }
 
 static Expression *
@@ -712,6 +713,7 @@ static Expression *
 PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
+  Fexpr *f = NULL;
 
   nb_args("%open-fexpr%", 1, args);
 
@@ -723,9 +725,12 @@ PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
     return NULL;
   }
 
-  return Expression_cons(Fexpr_body(Expression_expr(expr)),
-                         Expression_new(ENVIRONMENT,
-                                        Fexpr_lexenv(Expression_expr(expr))));
+  f = Expression_expr(expr);
+
+  return cons(Expression_new(SYMBOL, Fexpr_arg(f)),
+              cons(Expression_new(SYMBOL, Fexpr_dynenv(f)),
+                   cons(Fexpr_body(f), Expression_new(ENVIRONMENT,
+                                                      Fexpr_lexenv(f)))));
 }
 
 static Expression *
@@ -750,7 +755,7 @@ PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
 
   expr = Expression_new(NIL, NULL);
   for (i = size - 1; i >= 0; i--)
-    expr = Expression_cons(Expression_new(SYMBOL, members[i]), expr);
+    expr = cons(Expression_new(SYMBOL, members[i]), expr);
 
   return expr;
 }
@@ -759,6 +764,7 @@ PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
 #undef cdr
 #undef cadr
 #undef caddr
+#undef cons
 
 #undef nb_args
 
