@@ -7,7 +7,7 @@
 #include "environment.h"
 #include "eval.h"
 
-#define PRIMITIVE_COUNT 46
+#define PRIMITIVE_COUNT 48
 
 typedef struct Primitive Primitive;
 typedef Expression *(*PrimitiveProc)(Expression *, Environment **, Eval *);
