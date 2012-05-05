@@ -712,6 +712,45 @@ PrimitiveProc_greater (Expression *args, Environment **env, Eval *ev)
 /* --- */
 
 static Expression *
+PrimitiveProc_symbol_to_string (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("symbol->string", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != SYMBOL) {
+    Utils_error("symbol->string: expected symbol");
+    return NULL;
+  }
+
+  return Expression_new(STRING,
+                        String_new(Symbol_name(Expression_expr(expr))));
+}
+
+static Expression *
+PrimitiveProc_string_to_symbol (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("string->symbol", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != STRING) {
+    Utils_error("string->symbol: expected string");
+    return NULL;
+  }
+
+  return Expression_new(SYMBOL, Symbol_new(String_buf(Expression_expr(expr))));
+}
+
+/* --- */
+
+static Expression *
 PrimitiveProc_open_fexpr (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL;
@@ -773,54 +812,57 @@ PrimitiveProc_open_struct (Expression *args, Environment **env, Eval *ev)
 /* ----- */
 
 Primitive prim_[PRIMITIVE_COUNT] = {
-  { "define",        PrimitiveProc_define },
-  { "set",           PrimitiveProc_set },
-  { "sequence",      PrimitiveProc_sequence },
-  { "if",            PrimitiveProc_if },
-  { "same?",         PrimitiveProc_same },
-  { "eval",          PrimitiveProc_eval },
-  { "vau",           PrimitiveProc_vau },
-  { "environment",   PrimitiveProc_environment },
+  { "define",         PrimitiveProc_define },
+  { "set",            PrimitiveProc_set },
+  { "sequence",       PrimitiveProc_sequence },
+  { "if",             PrimitiveProc_if },
+  { "same?",          PrimitiveProc_same },
+  { "eval",           PrimitiveProc_eval },
+  { "vau",            PrimitiveProc_vau },
+  { "environment",    PrimitiveProc_environment },
 
-  { "cons",          PrimitiveProc_cons },
-  { "car",           PrimitiveProc_car },
-  { "cdr",           PrimitiveProc_cdr },
-  { "list",          PrimitiveProc_list },
-  { "length",        PrimitiveProc_length },
+  { "cons",           PrimitiveProc_cons },
+  { "car",            PrimitiveProc_car },
+  { "cdr",            PrimitiveProc_cdr },
+  { "list",           PrimitiveProc_list },
+  { "length",         PrimitiveProc_length },
 
-  { "struct",        PrimitiveProc_struct },
-  { "type",          PrimitiveProc_type },
+  { "struct",         PrimitiveProc_struct },
+  { "type",           PrimitiveProc_type },
 
-  { "null?",         PrimitiveProc_nullp },
-  { "primitive?",    PrimitiveProc_primitivep },
-  { "pair?",         PrimitiveProc_pairp },
-  { "symbol?",       PrimitiveProc_symbolp },
-  { "character?",    PrimitiveProc_characterp },
-  { "string?",       PrimitiveProc_stringp },
-  { "number?",       PrimitiveProc_numberp },
-  { "fexpr?",        PrimitiveProc_fexprp },
-  { "environment?",  PrimitiveProc_environmentp },
-  { "struct?",       PrimitiveProc_structp },
-  { "object?",       PrimitiveProc_objectp },
+  { "null?",          PrimitiveProc_nullp },
+  { "primitive?",     PrimitiveProc_primitivep },
+  { "pair?",          PrimitiveProc_pairp },
+  { "symbol?",        PrimitiveProc_symbolp },
+  { "character?",     PrimitiveProc_characterp },
+  { "string?",        PrimitiveProc_stringp },
+  { "number?",        PrimitiveProc_numberp },
+  { "fexpr?",         PrimitiveProc_fexprp },
+  { "environment?",   PrimitiveProc_environmentp },
+  { "struct?",        PrimitiveProc_structp },
+  { "object?",        PrimitiveProc_objectp },
 
-  { "write",         PrimitiveProc_write },
-  { "print",         PrimitiveProc_print },
-  { "error",         PrimitiveProc_error },
-  { "read",          PrimitiveProc_read },
-  { "scan",          PrimitiveProc_scan },
+  { "write",          PrimitiveProc_write },
+  { "print",          PrimitiveProc_print },
+  { "error",          PrimitiveProc_error },
+  { "read",           PrimitiveProc_read },
+  { "scan",           PrimitiveProc_scan },
 
-  { "+",             PrimitiveProc_add },
-  { "-",             PrimitiveProc_sub },
-  { "*",             PrimitiveProc_mul },
-  { "/",             PrimitiveProc_div },
-  { "div",           PrimitiveProc_idiv },
-  { "mod",           PrimitiveProc_mod },
-  { "=",             PrimitiveProc_equal },
-  { "<",             PrimitiveProc_lesser },
-  { ">",             PrimitiveProc_greater },
+  { "+",              PrimitiveProc_add },
+  { "-",              PrimitiveProc_sub },
+  { "*",              PrimitiveProc_mul },
+  { "/",              PrimitiveProc_div },
+  { "div",            PrimitiveProc_idiv },
+  { "mod",            PrimitiveProc_mod },
+  { "=",              PrimitiveProc_equal },
+  { "<",              PrimitiveProc_lesser },
+  { ">",              PrimitiveProc_greater },
 
-  { "%open-fexpr%",  PrimitiveProc_open_fexpr },
-  { "%open-struct%", PrimitiveProc_open_struct }
+  { "symbol->string", PrimitiveProc_symbol_to_string },
+  { "string->symbol", PrimitiveProc_string_to_symbol },
+
+  { "%open-fexpr%",   PrimitiveProc_open_fexpr },
+  { "%open-struct%",  PrimitiveProc_open_struct }
 };
 
 Symbol *

@@ -8,7 +8,7 @@ struct String {
 };
 
 String *
-String_new (char *str)
+String_new (const char *str)
 {
   String *self = NULL;
 

@@ -3,7 +3,7 @@
 
 typedef struct String String;
 
-String *String_new (char *str);
+String *String_new (const char *str);
 void String_delete (String *self);
 
 char *String_buf (String *self);

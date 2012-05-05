@@ -1,7 +1,7 @@
 #ifndef SYMBOL_H__
 #define SYMBOL_H__
 
-#define SYMBOL_NAME_MAX_SIZE 256
+#define SYMBOL_NAME_MAX_SIZE 512
 
 typedef struct Symbol Symbol;
 

@@ -13,7 +13,8 @@ Symbol_new (const char name[SYMBOL_NAME_MAX_SIZE])
 
   alloc_one(self);
 
-  strncpy(self->name, name, SYMBOL_NAME_MAX_SIZE);
+  strncpy(self->name, name, SYMBOL_NAME_MAX_SIZE - 1);
+  self->name[SYMBOL_NAME_MAX_SIZE - 1] = '\0';
 
   return self;
 }
