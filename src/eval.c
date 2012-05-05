@@ -102,7 +102,7 @@ Eval_applyStruct (Eval *self, Struct *type, const char *name, Expression *args,
 
   obj = Object_new(type, name);
 
-  size = Struct_size(Object_type(obj));
+  size = Struct_size(type);
   length = Expression_length(args);
 
   if (size != length) {
@@ -132,14 +132,21 @@ Eval_applyStruct (Eval *self, Struct *type, const char *name, Expression *args,
 static Expression *
 Eval_applyObject (Eval *self, Object *obj, Expression *arg, Environment **env)
 {
-  Expression *expr = NULL;
+  Expression *expr = arg;
   Symbol *field = NULL;
 
-  if ((expr = Eval_eval(self, arg, env)) == NULL)
-    return NULL;
+  if (Expression_type(arg) == PAIR) {
+    if (Expression_type(Expression_cdr(arg)) != NIL) {
+      Utils_error("object field access: malformed argument");
+      return NULL;
+    }
+
+    if ((expr = Eval_eval(self, Expression_car(arg), env)) == NULL)
+      return NULL;
+  }
 
   if (Expression_type(expr) != SYMBOL) {
-    Utils_error("struct %s field access: expected symbol as argument",
+    Utils_error("%s object field access: expected symbol as argument",
                 Object_name(obj));
     return NULL;
   }
