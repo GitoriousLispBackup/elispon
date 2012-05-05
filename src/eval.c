@@ -84,7 +84,7 @@ Eval_applyFexpr (Eval *self, Fexpr *f, Expression *args, Environment **env)
 {
   Environment *environment = NULL;
 
-  environment = Fexpr_lexenv(f);
+  environment = Environment_new(Fexpr_lexenv(f));
   Environment_add(environment, Fexpr_arg(f), args);
   Environment_add(environment, Fexpr_dynenv(f),
                   Expression_new(ENVIRONMENT, *env));
