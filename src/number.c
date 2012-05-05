@@ -72,7 +72,23 @@ Number_mod (Number *self, Number *num)
   return Number_new(round(self->val) % round(num->val));
 }
 
+/* ----- */
+
+Number *
+Number_round (Number *self)
+{
+  return Number_new(round(self->val));
+}
+
+Number *
+Number_abs (Number *self)
+{
+  return Number_new((self->val < 0) ? - self->val : self->val);
+}
+
 #undef round
+
+/* ----- */
 
 bool
 Number_eq (Number *self, Number *num)

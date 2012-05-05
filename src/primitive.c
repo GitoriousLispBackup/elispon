@@ -643,6 +643,42 @@ PrimitiveProc_mod (Expression *args, Environment **env, Eval *ev)
   return PrimitiveHelper_arith1("mod", Number_mod, args, env, ev);
 }
 
+static Expression *
+PrimitiveProc_round (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("round", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != NUMBER) {
+    Utils_error("round: expected number");
+    return NULL;
+  }
+
+  return Expression_new(NUMBER, Number_round(Expression_expr(expr)));
+}
+
+static Expression *
+PrimitiveProc_abs (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+
+  nb_args("abs", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != NUMBER) {
+    Utils_error("abs: expected number");
+    return NULL;
+  }
+
+  return Expression_new(NUMBER, Number_abs(Expression_expr(expr)));
+}
+
 static bool
 PrimitiveHelper_arithp (char *name, bool (*pred)(Number *, Number*),
                         Expression *args, Environment **env, Eval *ev)
@@ -854,6 +890,8 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "/",              PrimitiveProc_div },
   { "div",            PrimitiveProc_idiv },
   { "mod",            PrimitiveProc_mod },
+  { "round",          PrimitiveProc_round },
+  { "abs",            PrimitiveProc_abs },
   { "=",              PrimitiveProc_equal },
   { "<",              PrimitiveProc_lesser },
   { ">",              PrimitiveProc_greater },
