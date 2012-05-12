@@ -63,6 +63,12 @@ PrimitiveProc_fexprp (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
+PrimitiveProc_vectorp (Expression *args, Environment **env, Eval *ev)
+{
+  return PrimitiveHelper_typep("vector?", VECTOR, args, env, ev);
+}
+
+static Expression *
 PrimitiveProc_environmentp (Expression *args, Environment **env, Eval *ev)
 {
   return PrimitiveHelper_typep("environment?", ENVIRONMENT, args, env, ev);

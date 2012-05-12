@@ -7,6 +7,7 @@
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
+#include "vector.h"
 #include "environment.h"
 #include "struct.h"
 #include "object.h"
@@ -57,6 +58,9 @@ Expression_delete (Expression *self)
     break;
   case FEXPR:
     Fexpr_delete(self->expr);
+    break;
+  case VECTOR:
+    Vector_delete(self->expr);
     break;
   case ENVIRONMENT:
     Environment_delete(self->expr);
@@ -121,10 +125,14 @@ Expression_typeName (Expression *self)
     return "number";
   case FEXPR:
     return "fexpr";
+  case VECTOR:
+    return "vector";
   case ENVIRONMENT:
     return "environment";
   case STRUCT:
     return "struct";
+  case OBJECT:
+    return "object";
   default:
     return "unknown";
   }

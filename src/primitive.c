@@ -9,6 +9,7 @@
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
+#include "vector.h"
 #include "environment.h"
 #include "struct.h"
 #include "object.h"
@@ -64,6 +65,7 @@ Primitive_proc (Primitive *self)
 
 #include "primitives/core.c"
 #include "primitives/list.c"
+#include "primitives/vector.c"
 #include "primitives/struct.c"
 #include "primitives/predicates.c"
 #include "primitives/io.c"
@@ -97,6 +99,8 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "list",           PrimitiveProc_list },
   { "length",         PrimitiveProc_length },
 
+  { "vector",         PrimitiveProc_vector },
+
   { "struct",         PrimitiveProc_struct },
   { "type",           PrimitiveProc_type },
 
@@ -108,6 +112,7 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "string?",        PrimitiveProc_stringp },
   { "number?",        PrimitiveProc_numberp },
   { "fexpr?",         PrimitiveProc_fexprp },
+  { "vector?",        PrimitiveProc_vectorp },
   { "environment?",   PrimitiveProc_environmentp },
   { "struct?",        PrimitiveProc_structp },
   { "object?",        PrimitiveProc_objectp },

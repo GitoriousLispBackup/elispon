@@ -8,6 +8,7 @@
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
+#include "vector.h"
 #include "environment.h"
 #include "struct.h"
 #include "object.h"
@@ -114,6 +115,21 @@ Printer_printCharacter (Printer *self, Character *c)
   }
 }
 
+static void
+Printer_printVector (Printer *self, Vector *vector)
+{
+  int i, size;
+
+  size = Vector_size(vector);
+
+  Port_printf(self->output, "(vector");
+  for (i = 0; i < size; i++) {
+    Port_printf(self->output, " ");
+    Printer_print(self, Vector_get(vector, i));
+  }
+  Port_printf(self->output, ")");
+}
+
 /* ----- */
 
 void
@@ -143,6 +159,9 @@ Printer_print (Printer *self, Expression *expr)
     break;
   case NUMBER:
     Port_printf(self->output, "%g", Number_val(Expression_expr(expr)));
+    break;
+  case VECTOR:
+    Printer_printVector(self, Expression_expr(expr));
     break;
   case FEXPR:
   case ENVIRONMENT:

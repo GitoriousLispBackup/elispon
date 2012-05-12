@@ -9,6 +9,7 @@
 #include "string.h"
 #include "number.h"
 #include "fexpr.h"
+#include "vector.h"
 #include "environment.h"
 #include "struct.h"
 #include "object.h"
@@ -93,6 +94,36 @@ Eval_applyFexpr (Eval *self, Fexpr *f, Expression *args, Environment **env)
 }
 
 static Expression *
+Eval_applyVector (Eval *self, Vector *v, Expression *args, Environment **env)
+{
+  Expression *expr = NULL;
+  int n;
+
+  if ((n = Expression_length(args)) != 1) {
+    Utils_error("vector field access: expected 1 argument, given %d", n);
+    return NULL;
+  }
+
+  if ((expr = Eval_eval(self, Expression_car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != NUMBER) {
+    Utils_error("vector field access: expected number as argument");
+    return NULL;
+  }
+
+  n = (int)Number_val(Expression_expr(expr));
+
+  if (n < 0 || n >= Vector_size(v)) {
+    Utils_error("vector field access: index must be in [0,%d], given %d",
+                Vector_size(v) - 1, n);
+    return NULL;
+  }
+
+  return Vector_get(v, n);
+}
+
+static Expression *
 Eval_applyStruct (Eval *self, Struct *type, const char *name, Expression *args,
                   Environment **env)
 {
@@ -174,6 +205,8 @@ Eval_evalPair (Eval *self, Pair *pair, Environment **env)
     return Primitive_proc(Expression_expr(expr))(Pair_snd(pair), env, self);
   case FEXPR:
     return Eval_applyFexpr(self, Expression_expr(expr), Pair_snd(pair), env);
+  case VECTOR:
+    return Eval_applyVector(self, Expression_expr(expr), Pair_snd(pair), env);
   case STRUCT:
     return Eval_applyStruct(self, Expression_expr(expr),
                             ((Expression_type(Pair_fst(pair)) == SYMBOL)
@@ -212,6 +245,7 @@ Eval_eval (Eval *self, Expression *expr, Environment **env)
   case STRING:
   case NUMBER:
   case FEXPR:
+  case VECTOR:
   case ENVIRONMENT:
   case STRUCT:
   case OBJECT:
