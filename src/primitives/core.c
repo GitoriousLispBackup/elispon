@@ -161,3 +161,31 @@ PrimitiveProc_environment (Expression *args, Environment **env, Eval *ev)
 
   return Expression_new(ENVIRONMENT, Environment_copy(*env));
 }
+
+static Expression *
+PrimitiveProc_length (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL;
+  int length;
+
+  nb_args("length", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  switch (Expression_type(expr)) {
+  case PAIR:
+    length = Expression_length(expr);
+    break;
+  case STRING:
+    length = strlen(String_buf(Expression_expr(expr)));
+    break;
+  case VECTOR:
+    length = Vector_size(Expression_expr(expr));
+    break;
+  default:
+    length = 0;
+  }
+
+  return Expression_new(NUMBER, Number_new(length));
+}

@@ -79,16 +79,3 @@ PrimitiveProc_list (Expression *args, Environment **env, Eval *ev)
 
   return list;
 }
-
-static Expression *
-PrimitiveProc_length (Expression *args, Environment **env, Eval *ev)
-{
-  Expression *list = NULL;
-
-  nb_args("length", 1, args);
-
-  if ((list = Eval_eval(ev, car(args), env)) == NULL)
-    return NULL;
-
-  return Expression_new(NUMBER, Number_new(Expression_length(list)));
-}

@@ -92,12 +92,12 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "eval",           PrimitiveProc_eval },
   { "vau",            PrimitiveProc_vau },
   { "environment",    PrimitiveProc_environment },
+  { "length",         PrimitiveProc_length },
 
   { "cons",           PrimitiveProc_cons },
   { "car",            PrimitiveProc_car },
   { "cdr",            PrimitiveProc_cdr },
   { "list",           PrimitiveProc_list },
-  { "length",         PrimitiveProc_length },
 
   { "vector",         PrimitiveProc_vector },
 
