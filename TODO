@@ -30,12 +30,6 @@ char: actually need to use strings internally because of ε, é, etc. But how to
 
 ---
 
-vector type
-(vector foo bar baz)
-(make-vector 5)
-
----
-
 "with" matching in stdlib: see notebook
 
 ---

@@ -1,6 +1,8 @@
 #ifndef NUMBER_H__
 #define NUMBER_H__
 
+#include <stdbool.h>
+
 typedef struct Number Number;
 
 Number *Number_new (double val);
