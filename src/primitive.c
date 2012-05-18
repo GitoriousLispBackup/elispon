@@ -139,6 +139,8 @@ Primitive prim_[PRIMITIVE_COUNT] = {
   { "string->symbol", PrimitiveProc_string_to_symbol },
   { "number->string", PrimitiveProc_number_to_string },
   { "string->number", PrimitiveProc_string_to_number },
+  { "vector->list",   PrimitiveProc_vector_to_list },
+  { "list->vector",   PrimitiveProc_list_to_vector },
 
   { "%open-fexpr%",   PrimitiveProc_open_fexpr },
   { "%open-struct%",  PrimitiveProc_open_struct }
