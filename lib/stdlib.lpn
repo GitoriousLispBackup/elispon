@@ -2,42 +2,60 @@
 (define not null?)
 (define quote
   (vau args _ (car args)))
+(define q quote)
 
 (define apply
-  (vau args e
-       (eval (cons (eval (car args) e)
-                   (eval (car (cdr args)) e))
-             (if (= (length args) 3)
-                 (eval (car (cdr (cdr args))) e)
-                 e))))
+  (vau args env
+    (eval (cons (eval (car args) env)
+                (eval (car (cdr args)) env))
+          (if (= (length args) 3)
+              (eval (car (cdr (cdr args))) env)
+              env))))
 
-(define !
+(define wrap
   (vau args e
      (if (not (= (length args) 1))
-         (error "!: expecped 1 argument")
+         (error "wrap: expecped 1 argument")
          (sequence
            (define fexpr (eval (car args) e))
            (if (not (fexpr? fexpr))
-               (error "!: expected fexpr")
+               (error "wrap: expected fexpr")
                (vau arguments env
                   (apply fexpr (eval (cons list arguments) env))))))))
 
-(define &
+(define unwrap
   (vau args e
      (if (not (= (length args) 1))
-         (error "&: expecped 1 argument")
+         (error "unwrap: expecped 1 argument")
          (sequence
            (define app (eval (car args) e))
            (if (not (fexpr? app))
-               (error "&: expected fexpr")
+               (error "unwrap: expected fexpr")
                (sequence
                  (define fexpr (%open-fexpr% app))
-                 (eval (car (cdr (car fexpr))) (cdr fexpr))))))))
+                 (eval (car (cdr (car (cdr (cdr (car fexpr))))))
+                       (cdr fexpr))))))))
 
 (define lambda
   (vau args e
-     (! (eval (list vau (car args) (quote _) (car (cdr args))) e))))
+     (wrap (eval (list vau (car args) (quote _) (car (cdr args))) e))))
 (define λ lambda)
+
+; ((caar . cdar) cadr . cddr)
+(define caar (lambda expr (car (car (car expr)))))
+(define cadr (lambda expr (car (cdr (car expr)))))
+(define cdar (lambda expr (cdr (car (car expr)))))
+(define cddr (lambda expr (cdr (cdr (car expr)))))
+
+; (((caaar . cdaar) cadar . cddar) (caadr . cdadr) caddr . cdddr)
+(define caaar (lambda expr (car (car (car (car expr))))))
+(define caadr (lambda expr (car (car (cdr (car expr))))))
+(define cadar (lambda expr (car (cdr (car (car expr))))))
+(define caddr (lambda expr (car (cdr (cdr (car expr))))))
+(define cdaar (lambda expr (cdr (car (car (car expr))))))
+(define cdadr (lambda expr (cdr (car (cdr (car expr))))))
+(define cddar (lambda expr (cdr (cdr (car (car expr))))))
+(define cdddr (lambda expr (cdr (cdr (cdr (car expr))))))
 
 (define and
   (vau args e
@@ -65,58 +83,58 @@
          (sequence
            (define clause (car args))
            (define len (length clause))
-           (if (not (or (= len 2) (= len 3)))
+           (if (not (or (= len 2) (and (= len 3)
+                                       (same? (cadr clause) (quote =>)))))
                (error "cond: malformed clause")
                (sequence
                  (define c (eval (car clause) e))
                  (if c
-                     (if (and (= len 3)
-                              (same? (car (cdr clause)) (quote =>)))
-                         ((eval (car (cdr (cdr clause))) e) c)
-                         (eval (car (cdr clause)) e))
+                     (if (= len 2)
+                         (eval (car (cdr clause)) e)
+                         ((eval (caddr clause) e) c))
                      (apply cond (cdr args) e))))))))
 
-(define with
-  (vau args environ
-     (if (not (= (length args) 2))
-         (error "with: expected 2 arguments")
-         (sequence
-           (define pattern (car (car args)))
-           (define expression (eval (cdr (car args)) environ))
-           (define body (car (cdr args)))
-           (define new-env
-             (lambda args
-               (sequence
-                 (define pat (car args))
-                 (define exp (car (cdr args)))
-                 (define env (car (cdr (cdr args))))
-                 (cond
-                  ((null? pat)
-                   (if (not (null? exp))
-                       (error "with: expression doesn't match pattern")
-                       env))
-                  ((symbol? pat)
-                   (sequence
-                     (eval (list define pat (list quote exp)) env)
-                     env))
-                  ((pair? pat)
-                   (if (not (pair? exp))
-                       (error "with: expression doesn't match pattern")
-                       (new-env (cdr pat) (cdr exp)
-                                (new-env (car pat) (car exp) env))))
-                  (t (error "with: wrong pattern"))))))
-           (eval body (new-env pattern expression environ))))))
+;; (define with
+;;   (vau args environ
+;;      (if (not (= (length args) 2))
+;;          (error "with: expected 2 arguments")
+;;          (sequence
+;;            (define pattern (car (car args)))
+;;            (define expression (eval (cdr (car args)) environ))
+;;            (define body (car (cdr args)))
+;;            (define new-env
+;;              (lambda args
+;;                (sequence
+;;                  (define pat (car args))
+;;                  (define exp (car (cdr args)))
+;;                  (define env (car (cdr (cdr args))))
+;;                  (cond
+;;                   ((null? pat)
+;;                    (if (not (null? exp))
+;;                        (error "with: expression doesn't match pattern")
+;;                        env))
+;;                   ((symbol? pat)
+;;                    (sequence
+;;                      (eval (list define pat (list quote exp)) env)
+;;                      env))
+;;                   ((pair? pat)
+;;                    (if (not (pair? exp))
+;;                        (error "with: expression doesn't match pattern")
+;;                        (new-env (cdr pat) (cdr exp)
+;;                                 (new-env (car pat) (car exp) env))))
+;;                   (t (error "with: wrong pattern"))))))
+;;            (eval body (new-env pattern expression environ))))))
 
-(define list?
-  (vau args e
-     (with ((l) . args)
-       (or (null? l) (pair? l)))))
+;; (define list?
+;;   (vau args e
+;;      (with ((l) . args)
+;;        (or (null? l) (pair? l)))))
 
-(define is-a?
-  (vau args e
-       (with ((typ obj) . args)
-         (same? (eval typ e)
-                (type (eval obj e))))))
+;; (define is-a?
+;;   (vau args e
+;;        (with ((typ obj) . args)
+;;          (same? (eval typ e)
+;;                 (type (eval obj e))))))
 
 ;; (define $append
 ;;   (vau args e
