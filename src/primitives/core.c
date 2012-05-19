@@ -178,7 +178,7 @@ PrimitiveProc_length (Expression *args, Environment **env, Eval *ev)
     length = Expression_length(expr);
     break;
   case STRING:
-    length = strlen(String_buf(Expression_expr(expr)));
+    length = String_length(Expression_expr(expr));
     break;
   case VECTOR:
     length = Vector_size(Expression_expr(expr));

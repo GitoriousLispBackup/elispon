@@ -14,8 +14,8 @@ String_new (const char *str)
 
   alloc_one(self);
 
-  self->size = strlen(str) + 1;
-  alloc_(self->buf, self->size);
+  self->size = strlen(str);
+  alloc_(self->buf, self->size + 1);
   strcpy(self->buf, str);
 
   return self;
@@ -36,4 +36,18 @@ char *
 String_buf (String *self)
 {
   return self->buf;
+}
+
+int
+String_length (String *self)
+{
+  return self->size;
+}
+
+/* ----- */
+
+char
+String_getChar (String *self, int i)
+{
+  return self->buf[i];
 }

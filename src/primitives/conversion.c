@@ -77,6 +77,33 @@ PrimitiveProc_number_to_string (Expression *args, Environment **env, Eval *ev)
 }
 
 static Expression *
+PrimitiveProc_string_to_list (Expression *args, Environment **env, Eval *ev)
+{
+  Expression *expr = NULL, *list = NULL;
+  String *string = NULL;
+  int i;
+
+  nb_args("string->list", 1, args);
+
+  if ((expr = Eval_eval(ev, car(args), env)) == NULL)
+    return NULL;
+
+  if (Expression_type(expr) != STRING) {
+    Utils_error("string->list: expected string");
+    return NULL;
+  }
+
+  string = Expression_expr(expr);
+  list = Expression_new(NIL, NULL);
+  for (i = String_length(string) - 1; i >= 0; i--)
+    list = cons(Expression_new(CHARACTER,
+                               Character_new(String_getChar(string, i))),
+                list);
+
+  return list;
+}
+
+static Expression *
 PrimitiveProc_vector_to_list (Expression *args, Environment **env, Eval *ev)
 {
   Expression *expr = NULL, *list = NULL;
