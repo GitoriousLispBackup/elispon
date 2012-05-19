@@ -3,7 +3,7 @@
 #include "string.h"
 
 struct String {
-  int size;
+  int length;
   char *buf;
 };
 
@@ -14,8 +14,8 @@ String_new (const char *str)
 
   alloc_one(self);
 
-  self->size = strlen(str);
-  alloc_(self->buf, self->size + 1);
+  self->length = strlen(str);
+  alloc_(self->buf, self->length + 1);
   strcpy(self->buf, str);
 
   return self;
@@ -41,7 +41,7 @@ String_buf (String *self)
 int
 String_length (String *self)
 {
-  return self->size;
+  return self->length;
 }
 
 /* ----- */
