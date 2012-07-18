@@ -122,12 +122,12 @@ Printer_printVector (Printer *self, Vector *vector)
 
   size = Vector_size(vector);
 
-  Port_printf(self->output, "(vector");
+  Port_printf(self->output, "[");
   for (i = 0; i < size; i++) {
     Port_printf(self->output, " ");
     Printer_print(self, Vector_get(vector, i));
   }
-  Port_printf(self->output, ")");
+  Port_printf(self->output, " ]");
 }
 
 /* ----- */
