@@ -23,19 +23,6 @@
                (vau arguments env
                   (apply fexpr (eval (cons list arguments) env))))))))
 
-(define unwrap
-  (vau args e
-     (if (not (= (length args) 1))
-         (error "unwrap: expecped 1 argument")
-         (sequence
-           (define app (eval (car args) e))
-           (if (not (fexpr? app))
-               (error "unwrap: expected fexpr")
-               (sequence
-                 (define fexpr (%open-fexpr% app))
-                 (eval (car (cdr (car (cdr (cdr (car fexpr))))))
-                       (cdr fexpr))))))))
-
 (define lambda
   (vau args e
      (wrap (eval (list vau (car args) (quote _) (car (cdr args))) e))))
@@ -56,6 +43,19 @@
 (define cdadr (lambda expr (cdr (car (cdr (car expr))))))
 (define cddar (lambda expr (cdr (cdr (car (car expr))))))
 (define cdddr (lambda expr (cdr (cdr (cdr (car expr))))))
+
+(define unwrap
+  (vau args e
+     (if (not (= (length args) 1))
+         (error "unwrap: expecped 1 argument")
+         (sequence
+           (define app (eval (car args) e))
+           (if (not (fexpr? app))
+               (error "unwrap: expected fexpr")
+               (sequence
+                 (define fexpr (%open-fexpr% app))
+                 (eval (cadar (cddar fexpr))
+                       (cdr fexpr))))))))
 
 (define and
   (vau args e
