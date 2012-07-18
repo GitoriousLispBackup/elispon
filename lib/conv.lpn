@@ -1,0 +1,16 @@
+(define vector->list
+  (vau args env
+    (sequence
+      (define v (eval (car args) env))
+      (define v->l
+        (vau a e
+          (sequence
+            (define i (eval (car a) e))
+            (define l (cons (v i) (eval (car (cdr a)) e)))
+            (if (= 0 i)
+                l
+                (v->l (- i 1) l)))))
+      (v->l (- (length v) 1) ()))))
+
+(define list->vector
+  (vau args env (eval (cons vector (eval (car args) env)) env)))
